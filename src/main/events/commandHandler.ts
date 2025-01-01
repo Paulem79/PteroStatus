@@ -1,4 +1,4 @@
-import { Collection, Events } from "npm:discord.js@14.16.3";
+import { Collection, Events } from "npm:discord.js@14.17.0";
 
 import { HandledEvent } from "../handlers/events.ts";
 import { commands, cooldowns, defaultButtons } from "../main.ts";

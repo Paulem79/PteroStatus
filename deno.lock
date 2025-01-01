@@ -8,7 +8,8 @@
     "npm:@types/node@*": "22.5.4",
     "npm:axios@*": "1.7.7",
     "npm:discord.js@14.12.1": "14.12.1",
-    "npm:discord.js@14.16.3": "14.16.3"
+    "npm:discord.js@14.16.3": "14.16.3",
+    "npm:discord.js@14.17.0": "14.17.0"
   },
   "jsr": {
     "@std/assert@1.0.8": {
@@ -25,6 +26,18 @@
     }
   },
   "npm": {
+    "@discordjs/builders@1.10.0": {
+      "integrity": "sha512-ikVZsZP+3shmVJ5S1oM+7SveUCK3L9fTyfA8aJ7uD9cNQlTqF+3Irbk2Y22KXTb3C3RNUahRkSInClJMkHrINg==",
+      "dependencies": [
+        "@discordjs/formatters@0.6.0",
+        "@discordjs/util@1.1.1",
+        "@sapphire/shapeshift@4.0.0",
+        "discord-api-types@0.37.114",
+        "fast-deep-equal",
+        "ts-mixer@6.0.4",
+        "tslib@2.8.0"
+      ]
+    },
     "@discordjs/builders@1.6.4": {
       "integrity": "sha512-ARFKvmAkLhfkQQiNxqi0YIWqwUExvBRtvdtMFVJXvJoibsGkFrB/DWTf9byU7BTVUfsmW8w7NM55tYXR5S/iSg==",
       "dependencies": [
@@ -70,6 +83,12 @@
         "discord-api-types@0.37.97"
       ]
     },
+    "@discordjs/formatters@0.6.0": {
+      "integrity": "sha512-YIruKw4UILt/ivO4uISmrGq2GdMY6EkoTtD0oS0GvkJFRZbTSdPhzYiUILbJ/QslsvC9H9nTgGgnarnIl4jMfw==",
+      "dependencies": [
+        "discord-api-types@0.37.114"
+      ]
+    },
     "@discordjs/rest@2.0.0": {
       "integrity": "sha512-CW9ldfzsRzUbHcS4Oqu5+Moo+yrQ5qQ9groKNxPOzcoq2nuXa/fXOXkuQtQHcTeSVXsC9cmJ56M8gBDBUyLgGA==",
       "dependencies": [
@@ -93,6 +112,20 @@
         "@sapphire/snowflake@3.5.3",
         "@vladfrangu/async_event_emitter@2.4.6",
         "discord-api-types@0.37.97",
+        "magic-bytes.js@1.10.0",
+        "tslib@2.8.0",
+        "undici@6.19.8"
+      ]
+    },
+    "@discordjs/rest@2.4.1": {
+      "integrity": "sha512-a4Vv69usWY4ypwcENzH6QWYNrPwu+es3tRQMLKgaUFs0Mx2Yn7xfDW62++kcgckG8XbHWO7ej1x7raS7LuYgvA==",
+      "dependencies": [
+        "@discordjs/collection@2.1.1",
+        "@discordjs/util@1.1.1",
+        "@sapphire/async-queue@1.5.3",
+        "@sapphire/snowflake@3.5.3",
+        "@vladfrangu/async_event_emitter@2.4.6",
+        "discord-api-types@0.37.114",
         "magic-bytes.js@1.10.0",
         "tslib@2.8.0",
         "undici@6.19.8"
@@ -128,6 +161,20 @@
         "@types/ws@8.5.12",
         "@vladfrangu/async_event_emitter@2.4.6",
         "discord-api-types@0.37.83",
+        "tslib@2.8.0",
+        "ws@8.18.0"
+      ]
+    },
+    "@discordjs/ws@1.2.0": {
+      "integrity": "sha512-QH5CAFe3wHDiedbO+EI3OOiyipwWd+Q6BdoFZUw/Wf2fw5Cv2fgU/9UEtJRmJa9RecI+TAhdGPadMaEIur5yJg==",
+      "dependencies": [
+        "@discordjs/collection@2.1.1",
+        "@discordjs/rest@2.4.1",
+        "@discordjs/util@1.1.1",
+        "@sapphire/async-queue@1.5.3",
+        "@types/ws@8.5.12",
+        "@vladfrangu/async_event_emitter@2.4.6",
+        "discord-api-types@0.37.114",
         "tslib@2.8.0",
         "ws@8.18.0"
       ]
@@ -214,6 +261,9 @@
     "discord-api-types@0.37.100": {
       "integrity": "sha512-a8zvUI0GYYwDtScfRd/TtaNBDTXwP5DiDVX7K5OmE+DRT57gBqKnwtOC5Ol8z0mRW8KQfETIgiB8U0YZ9NXiCA=="
     },
+    "discord-api-types@0.37.114": {
+      "integrity": "sha512-9b9oOpktWSmE6ooToc46wfw151SHC/+idmnZvtwpEzW85BijUspQxj4W2uOmo+nZVTdEyb3fku58k+4rHKpdSQ=="
+    },
     "discord-api-types@0.37.52": {
       "integrity": "sha512-TP99aMgY6rHuDIy056GDm1j2nGOcaLbFpjVbvAmv6N6vhkjHNqHXCHVqKtGisaQ8D15slbxTHNl/SSkPdx2syg=="
     },
@@ -253,6 +303,23 @@
         "@discordjs/ws@1.1.1",
         "@sapphire/snowflake@3.5.3",
         "discord-api-types@0.37.100",
+        "fast-deep-equal",
+        "lodash.snakecase",
+        "tslib@2.8.0",
+        "undici@6.19.8"
+      ]
+    },
+    "discord.js@14.17.0": {
+      "integrity": "sha512-bK6oee/RBZF/LCPnR4afECsJV5voUVmfDmOHAMJSJeDeR42EkVyZJN3QVp1Uo0c3/OG0Z6vQVveY4+tFaMO4og==",
+      "dependencies": [
+        "@discordjs/builders@1.10.0",
+        "@discordjs/collection@1.5.3",
+        "@discordjs/formatters@0.6.0",
+        "@discordjs/rest@2.4.1",
+        "@discordjs/util@1.1.1",
+        "@discordjs/ws@1.2.0",
+        "@sapphire/snowflake@3.5.3",
+        "discord-api-types@0.37.114",
         "fast-deep-equal",
         "lodash.snakecase",
         "tslib@2.8.0",

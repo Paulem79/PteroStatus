@@ -5,7 +5,7 @@ import {
   ChatInputCommandInteraction,
   Client,
   ModalSubmitInteraction,
-} from "npm:discord.js@14.16.3";
+} from "npm:discord.js@14.17.0";
 import { SlashCommandOptionsOnlyBuilder } from "npm:@discordjs/builders@1.9.0";
 import path from "node:path";
 import fs from "node:fs";
