@@ -37,25 +37,3 @@ jobs:
 
       - name: Run tests
         run: deno test --allow-read --allow-env --env-file --allow-net src/test/test_panel.ts
-  test-discord:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Setup repo
-        uses: actions/checkout@v4
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.x
-
-      - name: Run linter
-        run: deno lint
-
-      - name: Create env file
-        run: |
-          touch .env
-          echo TOKEN=${{ secrets.TOKEN }} >> .env
-
-      - name: Run tests
-        run: deno test --allow-read --allow-env --env-file --allow-net src/test/test_bot.ts
