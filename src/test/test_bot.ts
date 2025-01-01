@@ -14,7 +14,7 @@ const client = new Client({
 Deno.test({
   name: "bot",
   permissions: { env: true, read: true, net: true },
-  fn: async () => {
+  fn: () => {
     const token = Deno.env.get("TOKEN");
 
     if (token == undefined) {
@@ -22,8 +22,8 @@ Deno.test({
       return assert.assertEquals(true, false);
     }
 
-    const login = await client.login(token);
-    await client.destroy();
+    const login = client.login(token);
+    client.destroy();
     assert.assertExists(login);
   },
 });
