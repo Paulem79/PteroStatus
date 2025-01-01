@@ -38,5 +38,11 @@ jobs:
       - name: Run linter
         run: deno lint
 
+      - name: Create env file
+        run: |
+          touch .env
+          echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
+          echo APIKEY=${{ secrets.APIKEY }} >> .env
+
       - name: Run tests
-        run: deno test --env-file src/test
+        run: deno test --allow-read --env-file src/test
