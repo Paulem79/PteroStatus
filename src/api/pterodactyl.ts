@@ -1,5 +1,3 @@
-import config from "../../config.json" with { type: "json" };
-
 interface HttpException {
   errors: Array<{
     code: string;
@@ -67,7 +65,10 @@ interface Nodes extends HttpException {
   };
 }
 
-export async function getNodes(hostname = config.hostname, apikey = config.apikey): Promise<Nodes | undefined> {
+export async function getNodes(
+  hostname: string,
+  apikey: string
+): Promise<Nodes | undefined> {
   try {
     const response = await fetch(`${hostname}/api/application/nodes`, {
       method: "GET",
