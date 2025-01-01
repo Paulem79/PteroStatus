@@ -19,11 +19,18 @@ Deno.test({
 
     if (token == undefined) {
       console.error("Missing TOKEN in environment");
-      return assert.assertEquals(true, false);
+      return assert.assertFalse(true);
     }
 
-    const login = client.login(token);
-    client.destroy();
-    assert.assertExists(login);
+    client
+      .login(token)
+      .then(() => {
+        client.destroy();
+        assert.assertFalse(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        assert.assertFalse(true);
+      });
   },
 });
