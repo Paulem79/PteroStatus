@@ -4,7 +4,7 @@ import { getNodes } from "../api/pterodactyl.ts";
 
 Deno.test({
   name: "request",
-  permissions: { env: true },
+  permissions: { env: true, read: true },
   fn: async () => {
     const hostname = Deno.env.get("HOSTNAME");
     const apikey = Deno.env.get("APIKEY");
