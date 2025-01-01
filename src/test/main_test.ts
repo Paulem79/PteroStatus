@@ -18,5 +18,6 @@ Deno.test({
         console.log(`Node: ${node.attributes.name} (${node.attributes.uuid})`);
       });
     }
+    assertEquals(true, false);
   },
 });
