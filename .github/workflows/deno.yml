@@ -50,16 +50,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Deploy file
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.5
+        uses: appleboy/ssh-action@master
         with:
-          username: ${{ secrets.FTP_USERNAME }}
-          server: ${{ secrets.FTP_DOMAIN }}
+          host: ${{ secrets.FTP_DOMAIN }}
           port: 2022
-          local_path: "./src/*"
-          remote_path: "/src/"
+          username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          ssh_private_key: ""
-          delete_remote_files: true
+          script: |
+            sftp -o StrictHostKeyChecking=no -P ${{ secrets.FTP_PASSWORD }} <<EOF
+            -mkdir -p /src/
+            -put -r src/* /src/
+            EOF
 
   restart:
     name: 🔄 Restart
