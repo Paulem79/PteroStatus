@@ -57,7 +57,6 @@ jobs:
           port: 2022
           local_path: "./src/*"
           remote_path: "/src/"
-          sftp_only: true
           password: ${{ secrets.FTP_PASSWORD }}
           ssh_private_key: ""
           delete_remote_files: true
@@ -74,6 +73,6 @@ jobs:
       - name: Pterodactyl-Restart
         uses: supercrafter100/Pterodactyl-Restart@v1.0
         with:
-          PTE_PANEL_URL: ${{ secrets.HOSTNAME }}
+          PTE_PANEL_URL: ${{ secrets.FTP_DOMAIN }}
           PTE_BEARER_TOKEN: ${{ secrets.APIKEY }}
           PTE_PANEL_ID: ${{ secrets.PTE_PANEL_ID }}
