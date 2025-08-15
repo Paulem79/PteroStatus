@@ -11,7 +11,7 @@ export default {
     setCommands(await getCommands(__dirname, "commands", client));
 
     setInterval(() => {
-      client.user.setActivity(`des livres audios`, {
+      client.user.setActivity(`${client.guilds.cache.size} serveur(s)`, {
         type: 2,
       });
     }, 10000);
