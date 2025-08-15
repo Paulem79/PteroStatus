@@ -51,7 +51,7 @@ jobs:
       - uses: rexlmanu/pterodactyl-upload-action@v2.5
         with:
           panel-host: ${{ secrets.HOSTNAME }}
-          api-key: ${{ secrets.APIKEY }}
+          api-key: ${{ secrets.USER_APIKEY }}
           server-id: ${{ secrets.PTE_PANEL_ID }}
           source: src.zip
           target: "./"
