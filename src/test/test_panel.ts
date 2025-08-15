@@ -15,7 +15,6 @@ Deno.test({
     }
 
     const nodes = await getNodes(hostname, apikey);
-    console.log(nodes);
     assert.assertExists(nodes);
   },
 });
