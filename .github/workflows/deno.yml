@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Setup repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Deno
         uses: denoland/setup-deno@v2
@@ -48,7 +48,7 @@ jobs:
       - test-panel
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Deploy file
         uses: appleboy/ssh-action@master
         with:
@@ -70,7 +70,7 @@ jobs:
       - deploy
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Pterodactyl-Restart
         uses: supercrafter100/Pterodactyl-Restart@v1.0
         with:
