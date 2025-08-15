@@ -3,7 +3,7 @@ import {
   Client,
   Collection,
   IntentsBitField,
-} from "npm:discord.js@14.17.0";
+} from "../deps.ts";
 
 import { getEvents } from "./handlers/events.ts";
 

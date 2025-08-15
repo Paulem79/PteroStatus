@@ -1,4 +1,4 @@
-import { Client, ClientEvents } from "npm:discord.js@14.17.0";
+import { Client, ClientEvents } from "../../deps.ts";
 import path from "node:path";
 import fs from "node:fs";
 

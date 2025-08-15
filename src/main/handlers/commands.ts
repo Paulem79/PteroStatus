@@ -5,8 +5,9 @@ import {
   ChatInputCommandInteraction,
   Client,
   ModalSubmitInteraction,
-} from "npm:discord.js@14.17.0";
-import { SlashCommandOptionsOnlyBuilder } from "npm:@discordjs/builders@1.9.0";
+  ApplicationCommandDataResolvable,
+} from "../../deps.ts";
+import { SlashCommandOptionsOnlyBuilder } from "../../deps.ts";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -102,11 +103,13 @@ export async function getCommands(
     "color: #ff9900"
   );
 
-  await client.application.commands.set(cmd.map((c) => c.data));
+  await client.application.commands.set(
+    cmd.map((c) => c.data.toJSON()) as ApplicationCommandDataResolvable[]
+  );
 
   console.log(
     `%c(/) Registered ${
-      client != null ? client.application.commands.cache.size : cmd.length
+      client.application.commands.cache.size
     } commands !`,
     "color: #22bb33"
   );

@@ -1,5 +1,8 @@
-import { SlashCommandBuilder } from "npm:@discordjs/builders@1.9.0";
+import { MessageFlags } from "npm:discord.js@14.21.0";
+import { SlashCommandBuilder } from "../../deps.ts";
 import { Command } from "../handlers/commands.ts";
+import {MessageBuilder} from "../../api/builder.ts";
+import {PingSystem} from "../../api/network.ts";
 
 export default new Command({
   data: new SlashCommandBuilder()
@@ -10,11 +13,11 @@ export default new Command({
     }),
 
   async execute(interaction) {
-    await interaction.reply({
-      content: `:ping_pong: Pong ! Le ping est de **${
-        (Date.now() - interaction.createdTimestamp) * 2
-      }ms**`,
-      ephemeral: true,
-    });
+      const ping = new PingSystem(interaction);
+      const message = new MessageBuilder()
+          .line(`:ping_pong: Pong ! Le ping est de **${ping.total()}ms**`)
+          .line(`Hébergement: **${ping.host()}ms**`)
+          .line(`API: **${ping.api()}ms**`);
+    await message.reply(interaction, MessageFlags.Ephemeral)
   },
 });

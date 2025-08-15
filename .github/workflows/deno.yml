@@ -2,9 +2,7 @@ name: Deno
 
 on:
   push:
-    branches: ["main"]
   pull_request:
-    branches: ["main"]
 
 permissions:
   contents: read
@@ -44,6 +42,7 @@ jobs:
     name: 🚀 Deploy
     permissions: write-all
     runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
     needs:
       - test-panel
     steps:
@@ -61,6 +60,7 @@ jobs:
             -mkdir -p /src/
             -put -r src/* /src/
             EOF
+            echo "SFTP deployment completed"
 
   restart:
     name: 🔄 Restart
