@@ -7,7 +7,7 @@ Deno.test({
   permissions: { env: true, net: true },
   fn: async () => {
     const hostname = Deno.env.get("HOSTNAME");
-    const apikey = Deno.env.get("APIKEY");
+    const apikey = Deno.env.get("USER_APIKEY");
 
     if (hostname == undefined || apikey == undefined) {
       console.error("Missing HOSTNAME or APIKEY in environment");
@@ -15,6 +15,7 @@ Deno.test({
     }
 
     const nodes = await getNodes(hostname, apikey);
+    console.log(nodes);
     assert.assertExists(nodes);
   },
 });
