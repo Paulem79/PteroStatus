@@ -17,7 +17,7 @@ export default new Command({
       const message = new MessageBuilder()
           .line(`:ping_pong: Pong ! Le ping est de **${ping.total()}ms**`)
           .line(`Hébergement: **${ping.host()}ms**`)
-          .line(`API: **${ping.api()}ms**`);
+          .line(`API: **${Math.max(ping.api(), 0)}ms**`);
     await message.reply(interaction, MessageFlags.Ephemeral)
   },
 });

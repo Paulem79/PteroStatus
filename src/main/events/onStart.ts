@@ -16,7 +16,7 @@ export default {
       });
     }, 10000);
 
-    console.log(`Ready! Logged in as ${client.user.tag}`);
+    console.log(`Prêt! Connecté en tant que ${client.user.tag}`);
   },
 
   eventType: Events.ClientReady,
