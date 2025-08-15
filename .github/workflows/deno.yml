@@ -36,7 +36,7 @@ jobs:
           echo APIKEY=${{ secrets.APIKEY }} >> .env
 
       - name: Run tests
-        run: deno test --allow-env --env-file --allow-net src/test/test_panel.ts
+        run: deno test --allow-read --allow-env --env-file --allow-net src/test/test_panel.ts
 
   deploy:
     name: 🚀 Deploy
