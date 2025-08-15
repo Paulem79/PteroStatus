@@ -48,14 +48,12 @@ jobs:
       - name: Compress src directory
         run: zip -r src.zip src
 
-      - run: echo "Hello world" > hello.txt
-
       - uses: rexlmanu/pterodactyl-upload-action@v2.5
         with:
           panel-host: ${{ secrets.HOSTNAME }}
           api-key: ${{ secrets.APIKEY }}
           server-id: ${{ secrets.PTE_PANEL_ID }}
-          source: "hello.txt"
+          source: src.zip
           target: "./"
           restart: true
           decompress-target: true
