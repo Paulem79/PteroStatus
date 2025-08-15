@@ -30,6 +30,7 @@ jobs:
           touch .env
           echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
           echo USER_APIKEY=${{ secrets.USER_APIKEY }} >> .env
+          echo PTE_PANEL_ID=${{ secrets.PTE_PANEL_ID }} >> .env
 
       - name: Run tests
         run: deno test --allow-read --allow-env --env-file --allow-net src/test/test_panel.ts
