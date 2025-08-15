@@ -35,7 +35,7 @@ jobs:
         run: deno test --allow-read --allow-env --env-file --allow-net src/test/test_panel.ts
 
   deploy:
-    name: 🚀 Deploy
+    name: 🚀 Deploy & Restart
     permissions: write-all
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
@@ -54,6 +54,6 @@ jobs:
           api-key: ${{ secrets.APIKEY }}
           server-id: ${{ secrets.PTE_PANEL_ID }}
           source: src.zip
-          target: "./src"
+          target: "./"
           restart: true
           decompress-target: true
