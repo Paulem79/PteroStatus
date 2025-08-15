@@ -7,19 +7,15 @@ export class PingSystem {
         this.interaction = interaction;
     }
 
-    private apiInternal() {
-        return this.interaction.client.ws.ping
-    }
-
     public api() {
-        return Math.round(this.apiInternal())
+        return Math.round(Math.max(0, this.interaction.client.ws.ping))
     }
 
     public host() {
-        return this.total() - this.apiInternal()
+        return Math.round(Math.max(0, this.total() - this.api()))
     }
 
     public total() {
-        return Date.now() - this.interaction.createdTimestamp
+        return Math.round(Date.now() - this.interaction.createdTimestamp)
     }
 }
