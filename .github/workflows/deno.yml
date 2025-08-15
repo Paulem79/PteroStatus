@@ -22,10 +22,6 @@ jobs:
         with:
           deno-version: v2.x
 
-      # Uncomment this step to verify the use of 'deno fmt' on each commit.
-      # - name: Verify formatting
-      #   run: deno fmt --check
-
       - name: Run linter
         run: deno lint
 
@@ -48,33 +44,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Deploy file
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.FTP_DOMAIN }}
-          port: 2022
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          debug: true
-          script: |
-            sftp -o StrictHostKeyChecking=no -P ${{ secrets.FTP_PASSWORD }} <<EOF
-            -mkdir -p /src/
-            -put -r src/* /src/
-            EOF
-            echo "SFTP deployment completed"
 
-  restart:
-    name: 🔄 Restart
-    permissions: write-all
-    runs-on: ubuntu-latest
-    needs:
-      - deploy
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-      - name: Pterodactyl-Restart
-        uses: supercrafter100/Pterodactyl-Restart@v1.0
+      - name: Compress src directory
+        run: zip -r src.zip src
+
+      - uses: rexlmanu/pterodactyl-upload-action@v2.1
         with:
-          PTE_PANEL_URL: ${{ secrets.FTP_DOMAIN }}
-          PTE_BEARER_TOKEN: ${{ secrets.APIKEY }}
-          PTE_PANEL_ID: ${{ secrets.PTE_PANEL_ID }}
+          panel-host: ${{ secrets.HOSTNAME }}
+          api-key: ${{ secrets.APIKEY }}
+          server-id: ${{ secrets.PTE_PANEL_ID }}
+          source: src.zip
+          target: "./src"
+          restart: true
+          decompress-target: true
