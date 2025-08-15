@@ -1,5 +1,4 @@
-import { MessageFlags } from "npm:discord.js@14.21.0";
-import { SlashCommandBuilder } from "../../deps.ts";
+import { MessageFlags, SlashCommandBuilder } from "../../deps.ts";
 import { Command } from "../handlers/commands.ts";
 import {MessageBuilder} from "../../api/builder.ts";
 import {PingSystem} from "../../api/network.ts";
