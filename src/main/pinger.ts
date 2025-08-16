@@ -159,7 +159,7 @@ async function updatePingMessage(
     const node = await getNode(ping.base_url, ping.app_key, id);
     if (!node) {
       embed.addFields({
-        name: `Node ${raw.attributes.name}`,
+        name: raw.attributes.name,
         value: `En Ligne ${await stateToEmoji("stopping")}`,
       });
       continue;
@@ -211,7 +211,7 @@ async function updatePingMessage(
     }
 
     embed.addFields({
-      name: `Node ${node.attributes.name}`,
+      name: node.attributes.name,
       value: serverMessage.build(),
     });
   }
