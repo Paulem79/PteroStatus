@@ -7,7 +7,8 @@
     "npm:@discordjs/builders@1.9.0": "1.9.0",
     "npm:@types/node@*": "22.5.4",
     "npm:axios@*": "1.7.7",
-    "npm:discord.js@14.21.0": "14.21.0"
+    "npm:discord.js@14.21.0": "14.21.0",
+    "npm:pterodactyl-api-wrapper@*": "2.0.8"
   },
   "jsr": {
     "@std/assert@1.0.8": {
@@ -249,6 +250,9 @@
     "@sapphire/snowflake@3.5.3": {
       "integrity": "sha512-jjmJywLAFoWeBi1W7994zZyiNWPIiqRRNAmSERxyg93xRGzNYvGjlZ0gR6x0F4gPRi2+0O6S71kOZYyr3cxaIQ=="
     },
+    "@types/axios@0.9.36": {
+      "integrity": "sha512-NLOpedx9o+rxo/X5ChbdiX6mS1atE4WHmEEIcR9NLenRVa5HoVjAvjafwU3FPTqnZEstpoqCaW7fagqSoTDNeg=="
+    },
     "@types/node@20.4.10": {
       "integrity": "sha512-vwzFiiy8Rn6E0MtA13/Cxxgpan/N6UeNYR9oUu6kuJWxu6zCk98trcDp8CBhbtaeuq9SykCmXkFr2lWLoPcvLg=="
     },
@@ -278,6 +282,14 @@
     },
     "asynckit@0.4.0": {
       "integrity": "sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q=="
+    },
+    "axios@1.10.0": {
+      "integrity": "sha512-/1xYAC4MP/HEG+3duIhFr4ZQXR4sQXOIe+o6sdqzeykGLx6Upp/1p8MHqhINOvGeP7xyNHe7tsiJByc4SSVUxw==",
+      "dependencies": [
+        "follow-redirects",
+        "form-data",
+        "proxy-from-env"
+      ]
     },
     "axios@1.7.7": {
       "integrity": "sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==",
@@ -376,6 +388,13 @@
     "proxy-from-env@1.1.0": {
       "integrity": "sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg=="
     },
+    "pterodactyl-api-wrapper@2.0.8": {
+      "integrity": "sha512-M1KqEgPemaVjVBjU4sXyOnRkO0a816rHpjpuBfbtrsiwUnxhjCCMC7gwAPN6nTrXdXxa3hS5m8oUWPqhuXfF+g==",
+      "dependencies": [
+        "@types/axios",
+        "axios@1.10.0"
+      ]
+    },
     "streamsearch@1.1.0": {
       "integrity": "sha512-Mcc5wHehp9aXz1ax6bZUyY5afg9u2rv5cqQI3mRrYkGC8rW2hM02jWuwjtL++LS5qinSyhj2QfLyNsuc+VsExg=="
     },
@@ -413,7 +432,14 @@
       "integrity": "sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw=="
     }
   },
+  "redirects": {
+    "https://deno.land/std/node/fs.ts": "https://deno.land/std@0.224.0/node/fs.ts"
+  },
   "remote": {
+    "https://cdn.skypack.dev/-/@devnote-dev/pterojs@v2.2.2-Kqi7v1z8hpmtryYdT72E/dist=es2019,mode=imports/optimized/@devnote-dev/pterojs.js": "ed9ae40ab04a359818f29cc1643791d860cb2a70eb2a85d5aa009ac83d272ce7",
+    "https://cdn.skypack.dev/-/axios@v0.27.2-FeA9YjncrTqq84XCZQMN/dist=es2019,mode=imports/optimized/axios.js": "8a17bb232bac3a688a6f19e1cfa026bb3874cdf9c7f6b041d343e3607fa0ce44",
+    "https://cdn.skypack.dev/-/ws@v8.13.0-kaANXM3hE9THmOf4i9Pe/dist=es2019,mode=imports/optimized/ws.js": "1d28a62de8fe1860778bab1543a277d81874c9a53a84810f945a2855975b1b6d",
+    "https://cdn.skypack.dev/@devnote-dev/pterojs": "145cb4d655a702278dbb3bf8cd41483bb137842e15b577106ccc86a514365ae7",
     "https://deno.land/std@0.198.0/collections/filter_values.ts": "16e1fc456a7969e770ec5b89edf5ac97b295ca534b47c1a83f061b409aad7814",
     "https://deno.land/std@0.198.0/collections/without_all.ts": "1e3cccb1ed0659455b473c0766d9414b7710d8cef48862c899f445178f66b779",
     "https://deno.land/std@0.198.0/dotenv/mod.ts": "ff7acf1c97ba57af512ecb6f9094fa96e1f63cca1960a7687616fa86bab7e356",
