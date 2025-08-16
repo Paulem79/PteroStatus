@@ -22,7 +22,7 @@ interface ServerMini { uuid?: string; identifier?: string; id?: number; name?: s
 function extractServers(node: SingleNode): ServerMini[] {
     const rel = node.attributes.relationships;
     const raw = rel?.servers?.data ?? [];
-    // Chaque entrée est supposée avoir .attributes
+    // Chaque entrée est supposée avoir attributes
     return raw.map((server) => server.attributes as ServerMini).filter(Boolean);
 }
 

@@ -168,7 +168,10 @@ export default new Command({
             const now = Date.now();
             if(!entry || (now - entry.at) > 30_000){
                 const apiNodes = await getNodes(ping.base_url, ping.app_key) as Nodes | undefined;
-                if(apiNodes){ entry = { at: now, nodes: apiNodes.data.map(d=>d.attributes) }; nodesCache.set(cacheKey, entry); }
+                if(apiNodes){
+                    entry = { at: now, nodes: apiNodes.data.map(d=>d.attributes) };
+                    nodesCache.set(cacheKey, entry);
+                }
             }
             const nodes = entry?.nodes ?? [];
             // Récupérer page actuelle depuis le message embed (titre contient Page X/Y) ou fallback 0
@@ -177,8 +180,16 @@ export default new Command({
             const currentPage = match ? Math.max(0, parseInt(match[1])-1) : 0;
             const embed = buildNodesEmbed(pingName, nodes, current, currentPage);
             const components = buildNodeButtons(nodes, current, pingName, guildId, currentPage);
-            try { await interaction.update({ embeds:[embed], components }); } catch { await interaction.reply({ embeds:[embed], components, flags: MessageFlags.Ephemeral  }); }
-            if(ping.channel_id){ await startPinger(interaction.client, ping.id, guildId); await triggerPingUpdate(interaction.client, ping.id, guildId); }
+            try {
+                await interaction.update({ embeds:[embed], components });
+            } catch {
+                await interaction.reply({ embeds:[embed], components, flags: MessageFlags.Ephemeral });
+            }
+
+            if(ping.channel_id){
+                await startPinger(interaction.client, ping.id, guildId);
+                await triggerPingUpdate(interaction.client, ping.id, guildId);
+            }
         }
     }
 });
