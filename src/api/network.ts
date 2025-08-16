@@ -12,10 +12,10 @@ export class PingSystem {
     }
 
     public host() {
-        return Math.round(Math.max(0, this.total() - this.api()))
+        return Math.round(Date.now() - this.interaction.createdTimestamp)
     }
 
     public total() {
-        return Math.round(Date.now() - this.interaction.createdTimestamp)
+        return this.host() + this.api()
     }
 }
