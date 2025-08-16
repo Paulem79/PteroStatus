@@ -6,7 +6,7 @@ import {
     PermissionsBitField,
     SlashCommandBuilder
 } from "../../deps.ts";
-import {getPing, listPings, setPingChannel, updatePingCredentials} from "../sql/requests.ts";
+import {getPing, listPings, setPingChannel, updatePingCredentials, updatePingName} from "../sql/requests.ts";
 import {MessageBuilder} from "../../api/builder.ts";
 import {getNodes} from "../../api/pterodactyl.ts";
 import {startPinger} from "../pinger.ts";
@@ -29,6 +29,18 @@ export default new Command({
                 })
                 .setRequired(true)
                 .setAutocomplete(true)
+        )
+        .addStringOption(option=>
+            option
+                .setName("newname")
+                .setNameLocalizations({
+                    fr: "nouveaunom"
+                })
+                .setDescription("Ping's new name")
+                .setDescriptionLocalizations({
+                    fr: "Nouveau nom du ping"
+                })
+                .setRequired(false)
         )
         .addStringOption(option=>
             option
@@ -68,12 +80,13 @@ export default new Command({
     async execute(interaction) {
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
-        const name = interaction.options?.getString("name", true)?.toLowerCase() ?? "";
+        let name = interaction.options?.getString("name", true)?.toLowerCase() ?? "";
+        const newName = interaction.options?.getString("newname")?.trim().toLowerCase();
         const newAppKey = interaction.options?.getString("appkey")?.trim();
         const newClientKey = interaction.options?.getString("clientkey")?.trim();
         const newChannel = interaction.options?.getChannel("channel") ?? null;
 
-        if(!newAppKey && !newClientKey && !newChannel){
+        if(!newAppKey && !newClientKey && !newChannel && !newName){
             await interaction.reply({content:"Aucun changement fourni.", flags: MessageFlags.Ephemeral});
             return;
         }
@@ -95,6 +108,16 @@ export default new Command({
 
         // Appliquer mises à jour
         const messageBuilder = new MessageBuilder();
+        if(newName || newName === ping.name){
+            const ok = await updatePingName(ping.id, newName);
+            if(!ok){
+                await interaction.reply({content:"Échec mise à jour du nom.", flags: MessageFlags.Ephemeral});
+                return;
+            }
+            messageBuilder.line("🏷️ Nom mis à jour");
+            name = newName;
+        }
+
         if(newAppKey || newClientKey){
             const ok = await updatePingCredentials(name, guildId, newAppKey, newClientKey);
             if(!ok){
@@ -104,9 +127,10 @@ export default new Command({
             if(newAppKey) messageBuilder.line("🔑 App Key mise à jour");
             if(newClientKey) messageBuilder.line("🗝️ Client Key mise à jour");
         }
+
         if(newChannel){
-            const ok2 = await setPingChannel(name, newChannel.id, guildId);
-            if(!ok2){
+            const ok = await setPingChannel(name, newChannel.id, guildId);
+            if(!ok){
                 await interaction.reply({content:"Échec mise à jour du salon.", flags: MessageFlags.Ephemeral});
                 return;
             }

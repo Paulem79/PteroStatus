@@ -144,3 +144,21 @@ export async function updatePingCredentials(name: string, guildId: string | unde
     await query(`UPDATE pings SET ${fields.join(", ")} WHERE id = ?`, params);
     return true;
 }
+
+export async function getPingById(id: number): Promise<PingRow | undefined> {
+    const rows = await query(`SELECT * FROM pings WHERE id = ? LIMIT 1`, [id]) as PingRow[];
+    const row = rows[0];
+
+    if(!row) return undefined;
+
+    return await decryptRow(row);
+}
+
+export async function updatePingName(id: number, name: string): Promise<boolean> {
+    const ping = await getPingById(id);
+
+    if(!ping) return false;
+
+    await query(`UPDATE pings SET name = ? WHERE id = ?`, [name, id]);
+    return true;
+}
