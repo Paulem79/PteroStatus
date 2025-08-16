@@ -39,9 +39,9 @@ export default new Command({
         const guildId = interaction.guildId;
         if(!guildId) { await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
         const name = interaction.options?.getString("nom", true)?.trim().toLowerCase() as string;
-        let baseurl = interaction.options?.getString("baseurl", true)!.trim();
-        const appkey = interaction.options?.getString("appkey", true)!.trim();
-        const clientkey = interaction.options?.getString("clientkey", true)!.trim();
+        let baseurl = interaction.options?.getString("baseurl", true).trim();
+        const appkey = interaction.options?.getString("appkey", true).trim();
+        const clientkey = interaction.options?.getString("clientkey", true).trim();
 
         if (!/^https?:\/\//i.test(baseurl)) baseurl = `https://${baseurl}`; // forcer schéma
         if (baseurl.endsWith('/')) baseurl = baseurl.slice(0, -1);

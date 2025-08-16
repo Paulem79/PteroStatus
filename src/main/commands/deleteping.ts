@@ -29,7 +29,9 @@ export default new Command({
                 try {
                     const msg = await channel.messages.fetch(ping.message_id);
                     await msg.delete().catch(()=>{});
-                } catch {}
+                } catch {
+                    // ignore
+                }
             }
         }
 

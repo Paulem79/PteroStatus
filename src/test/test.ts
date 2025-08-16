@@ -75,9 +75,9 @@ Deno.test({
             });
             assertFalse(!connected);
         } finally {
-            if (conn && typeof (conn as any).close === "function") {
+            if (conn && typeof (conn as unknown as ConnectionCloseable).close === "function") {
                 try {
-                    await (conn as any).close();
+                    await (conn as unknown as ConnectionCloseable).close();
                 } catch {
                     // ignore
                 }
@@ -85,3 +85,7 @@ Deno.test({
         }
     },
 });
+
+interface ConnectionCloseable {
+    close: () => Promise<void>;
+}
