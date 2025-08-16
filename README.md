@@ -30,7 +30,6 @@ Les clés (app_key / client_key) sont chiffrées en base via AES-GCM.
 Les motifs ressemblant à des clés (peli_*, plcn_*) sont remplacés par [SECRET] dans console.log/ warn/ error. Pour désactiver: LOG_MASK_DISABLE=1.
 
 ### Bonnes pratiques
-- Ne jamais commiter config.json avec des vraies clés (utiliser variables d'env).
 - Limiter les permissions des clés Pterodactyl.
 - Rotation périodique (ex: trimestrielle) avec la procédure ci-dessus.
 - Sauvegarder la base avant rotation.

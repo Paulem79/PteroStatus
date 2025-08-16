@@ -2,7 +2,6 @@ import {ButtonInteraction, Client, Collection, IntentsBitField,} from "../deps.t
 
 import {getEvents} from "./handlers/events.ts";
 
-import config from "../../config.json" with {type: "json"};
 import {Command} from "./handlers/commands.ts";
 
 import path from "node:path";
@@ -83,4 +82,4 @@ export async function defaultButtons(
   console.error(err);
 });
 
-client.login(config.token);
+client.login(Deno.env.get("TOKEN"));
