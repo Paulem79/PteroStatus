@@ -89,7 +89,7 @@ export default new Command({
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
         const id = interaction.options?.getNumber("id", true);
-        const newName = interaction.options?.getString("newname")?.trim().toLowerCase();
+        const newName = interaction.options?.getString("newname")?.trim();
         const newAppKey = interaction.options?.getString("appkey")?.trim();
         const newClientKey = interaction.options?.getString("clientkey")?.trim();
         const newChannel = interaction.options?.getChannel("channel") ?? null;
