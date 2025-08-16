@@ -13,7 +13,8 @@ import { getPing, PingRow, updatePingNodesFilter } from "../sql/requests.ts";
 import { getNodes } from "../../api/pterodactyl.ts";
 import { startPinger, triggerPingUpdate } from "../pinger.ts";
 import { NodeAttributes, Nodes } from "../../api/pterodactyl_types.ts";
-import { listPingAutocomplete } from "../../api/db.ts";
+
+import {listPingAutocomplete} from "../../api/listPingAutocomplete.ts";
 
 // Cache nodes (guildId:pingName) 30s
 const nodesCache = new Map<string, { at: number; nodes: NodeAttributes[] }>();

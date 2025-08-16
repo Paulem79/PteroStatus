@@ -11,7 +11,8 @@ import {
 import { getPing, setPingChannel } from "../sql/requests.ts";
 import { MessageBuilder } from "../../api/builder.ts";
 import { startPinger } from "../pinger.ts";
-import { listPingAutocomplete } from "../../api/db.ts";
+
+import {listPingAutocomplete} from "../../api/listPingAutocomplete.ts";
 
 export default new Command({
   data: new SlashCommandBuilder()
