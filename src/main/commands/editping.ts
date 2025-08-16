@@ -18,7 +18,13 @@ export default new Command({
         .setContexts(InteractionContextType.Guild)
         .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
         .setName("editping")
-        .setDescription("Modifier les clés ou le salon d'un ping")
+        .setNameLocalizations({
+            fr: "modifierping",
+        })
+        .setDescription("Edit the keys, the channel, or the name of a ping.")
+        .setDescriptionLocalizations({
+            fr: "Modifier les clés, le salon, ou le nom d'un ping"
+        })
         .addNumberOption(option =>
             option
                 .setName("id")
