@@ -2,7 +2,7 @@
 
 import {Command} from "../handlers/commands.ts";
 import {InteractionContextType, MessageFlags, PermissionsBitField, SlashCommandBuilder} from "../../deps.ts";
-import {createPing, listPings} from "../sql/requests.ts";
+import {createPing} from "../sql/requests.ts";
 import {getNodes} from "../../api/pterodactyl.ts";
 import {MessageBuilder} from "../../api/builder.ts";
 
@@ -74,12 +74,6 @@ export default new Command({
 
         if (name.length > 64) {
             await interaction.reply({content: "Nom trop long (64 max).", flags: MessageFlags.Ephemeral});
-            return;
-        }
-
-        // Collision locale
-        if ((await listPings(guildId)).find((p) => p.name === name)) {
-            await interaction.reply({content: "Un ping avec ce nom existe déjà sur cette guilde.", flags: MessageFlags.Ephemeral});
             return;
         }
 

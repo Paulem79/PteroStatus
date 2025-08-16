@@ -9,10 +9,11 @@ import {
     PermissionsBitField,
     SlashCommandBuilder
 } from "../../deps.ts";
-import {getPing, listPings, PingRow, updatePingNodesFilter} from "../sql/requests.ts";
+import {getPing, PingRow, updatePingNodesFilter} from "../sql/requests.ts";
 import {getNodes} from "../../api/pterodactyl.ts";
 import {startPinger, triggerPingUpdate} from "../pinger.ts";
 import {NodeAttributes, Nodes} from "../../api/pterodactyl_types.ts";
+import {listPingAutocomplete} from "../../api/db.ts";
 
 // Cache nodes (guildId:pingName) 30s
 const nodesCache = new Map<string, { at: number; nodes: NodeAttributes[] }>();
@@ -126,15 +127,8 @@ export default new Command({
             await interaction.respond([]);
             return;
         }
-        const focused = interaction.options.getFocused(true);
-        if(focused.name === 'id') {
-            const pings = await listPings(guildId);
-            const filtered = pings
-                .filter(p=> p.id.toString().includes(focused.value))
-                .slice(0,25)
-                .map(p=>({ name:p.name, value:p.id }));
-            await interaction.respond(filtered);
-        }
+
+        await listPingAutocomplete(interaction);
     },
 
     async button(interaction){

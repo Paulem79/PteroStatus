@@ -2,8 +2,9 @@
 
 import {Command} from "../handlers/commands.ts";
 import {InteractionContextType, MessageFlags, PermissionsBitField, SlashCommandBuilder} from "../../deps.ts";
-import {deletePing, getPing, listPings} from "../sql/requests.ts";
+import {deletePing, getPing} from "../sql/requests.ts";
 import {stopPinger} from "../pinger.ts";
+import {listPingAutocomplete} from "../../api/db.ts";
 
 export default new Command({
     data: new SlashCommandBuilder()
@@ -62,14 +63,7 @@ export default new Command({
 
     async autocomplete(interaction) {
         const guildId = interaction.guildId; if(!guildId){ await interaction.respond([]); return; }
-        const focused = interaction.options.getFocused(true);
-        if(focused.name !== 'id') return;
-        const value = focused.value.toLowerCase();
-        const pings = await listPings(guildId);
-        await interaction.respond(pings
-            .filter(p=>p.name.toLowerCase().includes(value))
-            .slice(0,25)
-            .map(p=>({name:p.name, value:p.id}))
-        );
+
+        await listPingAutocomplete(interaction);
     }
 });

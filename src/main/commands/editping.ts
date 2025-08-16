@@ -8,10 +8,11 @@ import {
     PermissionsBitField,
     SlashCommandBuilder
 } from "../../deps.ts";
-import {getPing, listPings, setPingChannel, updatePingCredentials, updatePingName} from "../sql/requests.ts";
+import {getPing, setPingChannel, updatePingCredentials, updatePingName} from "../sql/requests.ts";
 import {MessageBuilder} from "../../api/builder.ts";
 import {getNodes} from "../../api/pterodactyl.ts";
 import {startPinger} from "../pinger.ts";
+import {listPingAutocomplete} from "../../api/db.ts";
 
 export default new Command({
     data: new SlashCommandBuilder()
@@ -170,15 +171,11 @@ export default new Command({
 
     async autocomplete(interaction) {
         const guildId = interaction.guildId;
-        if(!guildId){ await interaction.respond([]); return; }
-        const focused = interaction.options.getFocused(true);
-        if(focused.name !== 'id') return;
-        const value = focused.value.toLowerCase();
-        const pings = await listPings(guildId);
-        const filtered = pings
-            .filter(p=> p.name.toLowerCase().includes(value))
-            .slice(0,25)
-            .map(p=>({ name: p.name, value: p.id }));
-        await interaction.respond(filtered);
+        if(!guildId){
+            await interaction.respond([]);
+            return;
+        }
+
+        await listPingAutocomplete(interaction);
     }
 });
