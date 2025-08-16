@@ -63,11 +63,6 @@ export default new Command({
             return;
         }
 
-        if(ping.channel_id) {
-            await interaction.reply({content: "Le salon est déjà défini.", flags: MessageFlags.Ephemeral});
-            return;
-        }
-
         const ok = await setPingChannel(ping.id, channel.id, guildId);
         if(!ok){
             await interaction.reply({content: "Impossible de mettre à jour le salon.", flags: MessageFlags.Ephemeral});

@@ -85,7 +85,7 @@ async function updatePingMessage(id: number, client: Client<true>, messageId: st
         message = await channel.messages.fetch(messageId);
     } catch {
         const sent = await channel.send({ content: `Recréation du statut (${ping.name})...` });
-        await setPingMessageId(id, sent.id);
+        await setPingMessageId(id, sent.id, guildId);
         message = sent;
         messageId = sent.id; // mise à jour pour les prochains cycles
     }

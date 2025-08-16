@@ -79,9 +79,9 @@ export async function setPingChannel(id: number, channelId: string, guildId: str
     return true;
 }
 
-export async function setPingMessageId(id: number, messageId: string, guildId?: string) {
+export async function setPingMessageId(id: number, messageId: string, guildId: string) {
     const ping = await getPingById(id);
-    if (!ping || (!guildId || ping.guild_id != guildId)) return false;
+    if (!ping || ping.guild_id != guildId) return false;
     await query(`UPDATE pings SET message_id = ? WHERE id = ?`, [messageId, id]);
     return true;
 }

@@ -2,7 +2,7 @@
 
 import {Command} from "../handlers/commands.ts";
 import {InteractionContextType, MessageFlags, PermissionsBitField, SlashCommandBuilder} from "../../deps.ts";
-import {createPing, getPing, listPings} from "../sql/requests.ts";
+import {createPing, listPings} from "../sql/requests.ts";
 import {getNodes} from "../../api/pterodactyl.ts";
 import {MessageBuilder} from "../../api/builder.ts";
 
