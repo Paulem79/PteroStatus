@@ -1,7 +1,6 @@
-import {Colors, EmbedBuilder} from "../deps.ts";
-import {Client} from "../deps.ts";
+import {Client, Colors, EmbedBuilder} from "../deps.ts";
 import {getAllPings, setPingMessageId} from "./sql/requests.ts";
-import {getNodes, getNode, getResources} from "../api/pterodactyl.ts";
+import {getNode, getNodes, getResources} from "../api/pterodactyl.ts";
 import {ServerResponse, ServerState} from "../api/pterodactyl_types.ts";
 import {client} from "./main.ts";
 import {MessageBuilder} from "../api/builder.ts";

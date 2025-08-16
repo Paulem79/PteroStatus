@@ -1,5 +1,5 @@
 import {connection} from "../main.ts";
-import { encryptForStorage, decryptFromStorage } from "../crypto.ts";
+import {decryptFromStorage, encryptForStorage} from "../crypto.ts";
 
 // Helper générique pour exécuter une requête avec Promesse
 function query<T = unknown>(sql: string, params: unknown[] = []): Promise<T> {

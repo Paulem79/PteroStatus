@@ -1,7 +1,13 @@
 import {Command} from "../handlers/commands.ts";
 import {
-    ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, InteractionContextType, MessageFlags,
-    PermissionsBitField, SlashCommandBuilder
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle,
+    EmbedBuilder,
+    InteractionContextType,
+    MessageFlags,
+    PermissionsBitField,
+    SlashCommandBuilder
 } from "../../deps.ts";
 import {getPing, listPings, updatePingServersFilter} from "../sql/requests.ts";
 import {getNode, getNodes} from "../../api/pterodactyl.ts";

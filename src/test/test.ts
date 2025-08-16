@@ -2,7 +2,7 @@ import * as assert from "jsr:@std/assert";
 import "jsr:@std/dotenv/load";
 import {getNodes, getServer} from "../api/pterodactyl.ts";
 import {getConnection, tryConnection} from "../api/db.ts";
-import { assertFalse } from "jsr:@std/assert/false";
+import {assertFalse} from "jsr:@std/assert/false";
 
 Deno.test({
     name: "request_panel",
@@ -47,8 +47,41 @@ Deno.test({
 Deno.test({
     name: "connect_db",
     permissions: { env: true, net: true, read: true },
-    fn: () => {
-        // Basically assertTrue with the !
-        assertFalse(!tryConnection(getConnection(), () => {}))
+    fn: async () => {
+        const conn = getConnection(false);
+        let connected = false;
+        let timer: number | undefined;
+        try {
+            await new Promise<void>((resolve, reject) => {
+                const timeoutMs = 10000;
+                const onTimeout = () => {
+                    timer = undefined;
+                    reject(new Error("Timeout connexion DB"));
+                };
+                timer = setTimeout(onTimeout, timeoutMs);
+
+                function cleanup() {
+                    if (timer !== undefined) {
+                        clearTimeout(timer);
+                        timer = undefined;
+                    }
+                }
+
+                tryConnection(conn, () => {
+                    connected = true;
+                    cleanup();
+                    resolve();
+                });
+            });
+            assertFalse(!connected);
+        } finally {
+            if (conn && typeof (conn as any).close === "function") {
+                try {
+                    await (conn as any).close();
+                } catch {
+                    // ignore
+                }
+            }
+        }
     },
 });

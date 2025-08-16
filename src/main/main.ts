@@ -8,7 +8,6 @@ import {Command} from "./handlers/commands.ts";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
 
-import mysql from 'npm:mysql2';
 import {ensureTables} from "./sql/requests.ts";
 import {getConnection, tryConnection} from "../api/db.ts";
 

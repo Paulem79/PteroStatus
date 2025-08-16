@@ -1,6 +1,6 @@
-import mysql, {Connection} from "npm:mysql2@3.14.3";
+import mysql, {Connection} from "npm:mysql2";
 
-export function getConnection() {
+export function getConnection(keepAlive = true) {
     return mysql.createConnection({
         host: Deno.env.get("DB_HOST"),
         user: Deno.env.get("DB_USER"),
@@ -12,23 +12,18 @@ export function getConnection() {
         maxIdle: 10, // max idle connections, the default value is the same as `connectionLimit`
         idleTimeout: 60000, // idle connections timeout, in milliseconds, the default value 60000
         queueLimit: 0,
-        enableKeepAlive: true,
+        enableKeepAlive: keepAlive,
         keepAliveInitialDelay: 0,
     });
 }
 
-export function tryConnection(connection: Connection, callback?: () => void) {
-    let connected = false;
+export function tryConnection(connection: Connection, onSuccess?: () => void) {
     connection.connect((err) => {
         if (err) {
             console.error("Erreur de connexion à la base de données:", err);
-            connected = false;
         } else {
             console.log("Connecté à la base de données MySQL");
-            if (callback) callback();
-            connected = true;
+            if (onSuccess) onSuccess();
         }
     });
-
-    return connected;
 }
