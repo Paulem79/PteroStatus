@@ -21,8 +21,8 @@ async function derive(secret: string): Promise<ArrayBuffer> {
 
 async function loadKeys(): Promise<{ primary: CryptoKey | null; secondary: CryptoKey | null; }> {
     if(cachedPrimary || cachedSecondary) return { primary: cachedPrimary, secondary: cachedSecondary };
-    const primarySecret = Deno.env.get("ENC_SECRET") || Deno.env.get("APP_ENC_SECRET") || Deno.env.get("PING_ENC_SECRET") || null;
-    const previousSecret = Deno.env.get("ENC_SECRET_PREVIOUS") || Deno.env.get("APP_ENC_SECRET_PREVIOUS") || Deno.env.get("PING_ENC_SECRET_PREVIOUS") || null;
+    const primarySecret = Deno.env.get("ENC_SECRET") || null;
+    const previousSecret = Deno.env.get("ENC_SECRET_PREVIOUS") || null;
 
     if(primarySecret){
         const mat = await derive(primarySecret);
