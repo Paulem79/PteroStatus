@@ -3,14 +3,13 @@ import {ActivityType, Colors, EmbedBuilder, Events} from "../../deps.ts";
 import {HandledEvent} from "../handlers/events.ts";
 import {__dirname, setCommands} from "../main.ts";
 import {getCommands} from "../handlers/commands.ts";
-import {getNode, getNodes, getResources, getServer} from "../../api/pterodactyl.ts";
+import {getNode, getNodes, getResources} from "../../api/pterodactyl.ts";
 
 import ptero from "npm:pterodactyl-api-wrapper";
 const api = ptero.default;
 
 import config from "../../../config.json" with {type: "json"};
 import {MessageBuilder} from "../../api/builder.ts";
-import {ServerResponse} from "../../api/pterodactyl_types.ts";
 
 export default {
     once: true,
@@ -53,7 +52,7 @@ export default {
 
                         for (const nodeServer of nodeServers) {
                             const resources = await getResources(config.hostname, config.clientkey, nodeServer.attributes.uuid);
-                            console.log(resources);
+
                             if(!resources || resources.errors) {
                                 fieldMessage.line(`**${nodeServer.attributes.name}** Hors-ligne`);
                                 continue;
