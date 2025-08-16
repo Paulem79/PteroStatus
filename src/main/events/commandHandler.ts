@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 
-import { Collection, Events } from "../../deps.ts";
+import { Collection, Events, MessageFlags } from "../../deps.ts";
 
 import { HandledEvent } from "../handlers/events.ts";
 import { commands, cooldowns, defaultButtons } from "../main.ts";
@@ -13,7 +13,7 @@ export default {
       if (!interaction.inCachedGuild()) {
         return await interaction.reply({
           content: "Vous ne pouvez pas faire ceci !",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -23,7 +23,7 @@ export default {
       if (!slashCommand) {
         interaction.reply({
           content: "Une erreur est survenue !",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -50,7 +50,7 @@ export default {
           await interaction.reply({
             content:
               `Veuillez attendre <t:${expiredTimestamp}:R> pour réutiliser \`/${slashCommand.data.name}\``,
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
           return;
         }
@@ -66,7 +66,7 @@ export default {
       } catch (err) {
         await interaction.reply({
           content: "Une erreur est survenue !",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         console.log(err);
         return;
@@ -92,7 +92,7 @@ export default {
       if (!interaction.inCachedGuild()) {
         return await interaction.reply({
           content: "Vous ne pouvez pas faire ceci !",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -103,7 +103,7 @@ export default {
       if (slashCommand == undefined || slashCommand.selectmenu == undefined) {
         return await interaction.reply({
           content: "Une erreur est survenue !",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -117,7 +117,7 @@ export default {
       if (!interaction.inCachedGuild()) {
         return await interaction.reply({
           content: "Vous ne pouvez pas faire ceci !",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -128,7 +128,7 @@ export default {
       if (slashCommand == undefined || slashCommand.modal == undefined) {
         return await interaction.reply({
           content: "Une erreur est survenue !",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -141,7 +141,7 @@ export default {
       if (!interaction.inCachedGuild()) {
         return await interaction.reply({
           content: "Vous ne pouvez pas faire ceci !",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
       if (interaction.message.interactionMetadata == undefined) {

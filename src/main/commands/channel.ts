@@ -96,6 +96,7 @@ export default new Command({
     const mb = new MessageBuilder()
       .line(`🔗 Salon associé pour **${ping.name}** → <#${channel.id}>`);
     await mb.reply(interaction, MessageFlags.Ephemeral);
+
     await startPinger(interaction.client, ping.id, guildId);
   },
 
