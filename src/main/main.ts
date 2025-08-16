@@ -73,6 +73,28 @@ export async function defaultButtons(
     }
 }
 
+// Masquage basique de clés dans les logs (patterns peli_ / plcn_) pour éviter fuite accidentelle
+(function setupLogMasking(){
+  if(Deno.env.get("LOG_MASK_DISABLE")) return;
+  const secretRegex = /\b(peli_[A-Za-z0-9]+|plcn_[A-Za-z0-9]+)\b/g;
+  function maskArg(a: unknown){
+    if(typeof a === 'string') return a.replace(secretRegex, '[SECRET]');
+    if(a && typeof a === 'object') {
+      try { return JSON.stringify(a).replace(secretRegex, '[SECRET]'); } catch { return a; }
+    }
+    return a;
+  }
+  const wrap = (orig: (...args: unknown[])=>void)=> (...args: unknown[])=>{
+    try {
+      const masked = args.map(maskArg);
+      orig.apply(console, masked);
+    } catch { orig.apply(console, args); }
+  };
+  console.log = wrap(console.log);
+  console.error = wrap(console.error);
+  console.warn = wrap(console.warn);
+})();
+
 (async () => {
   events = await getEvents(__dirname, "events", client);
 })().catch((err) => {

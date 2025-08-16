@@ -1,4 +1,5 @@
 import {connection} from "../main.ts";
+import { encryptForStorage, decryptFromStorage } from "../crypto.ts";
 
 // Helper générique pour exécuter une requête avec Promesse
 function query<T = unknown>(sql: string, params: unknown[] = []): Promise<T> {
@@ -32,8 +33,8 @@ export interface PingRow {
     id: number;
     name: string;
     base_url: string;
-    app_key: string;
-    client_key: string;
+    app_key: string; // toujours en clair dans l'objet retourné (déchiffré si chiffré en base)
+    client_key: string; // idem
     channel_id: string | null;
     message_id: string | null;
     nodes_filter: string | null;
@@ -42,9 +43,28 @@ export interface PingRow {
     guild_id: string | null; // ajout
 }
 
+async function decryptRow(row: PingRow): Promise<PingRow> {
+    // Déchiffre et migre si nécessaire app_key
+    const app = await decryptFromStorage(row.app_key);
+    if(app.reencrypted) {
+        // met à jour silencieusement la base (migration en arrière-plan)
+        query(`UPDATE pings SET app_key = ? WHERE id = ?`, [app.reencrypted, row.id]).catch(()=>{});
+    }
+    // Déchiffre et migre client_key
+    const cli = await decryptFromStorage(row.client_key);
+    if(cli.reencrypted) {
+        query(`UPDATE pings SET client_key = ? WHERE id = ?`, [cli.reencrypted, row.id]).catch(()=>{});
+    }
+    row.app_key = app.plain ?? "";
+    row.client_key = cli.plain ?? "";
+    return row;
+}
+
 export async function createPing(name: string, baseUrl: string, appKey: string, clientKey: string, guildId: string): Promise<boolean> {
     try {
-        await query(`INSERT INTO pings (name, base_url, app_key, client_key, guild_id) VALUES (?,?,?,?,?)`, [name, baseUrl, appKey, clientKey, guildId]);
+        const encApp = await encryptForStorage(appKey);
+        const encClient = await encryptForStorage(clientKey);
+        await query(`INSERT INTO pings (name, base_url, app_key, client_key, guild_id) VALUES (?,?,?,?,?)`, [name, baseUrl, encApp, encClient, guildId]);
         return true;
     } catch (e: unknown) {
         if ((e as { code?: string })?.code === 'ER_DUP_ENTRY') return false;
@@ -53,12 +73,15 @@ export async function createPing(name: string, baseUrl: string, appKey: string, 
 }
 
 export async function getPing(name: string, guildId?: string): Promise<PingRow | undefined> {
+    let rows: PingRow[];
     if (guildId) {
-        const rows = await query(`SELECT * FROM pings WHERE name = ? AND guild_id = ? LIMIT 1`, [name, guildId]) as PingRow[];
-        return rows[0];
+        rows = await query(`SELECT * FROM pings WHERE name = ? AND guild_id = ? LIMIT 1`, [name, guildId]) as PingRow[];
+    } else {
+        rows = await query(`SELECT * FROM pings WHERE name = ? LIMIT 1`, [name]) as PingRow[];
     }
-    const rows = await query(`SELECT * FROM pings WHERE name = ? LIMIT 1`, [name]) as PingRow[];
-    return rows[0];
+    const row = rows[0];
+    if(!row) return undefined;
+    return await decryptRow(row);
 }
 
 export async function setPingChannel(name: string, channelId: string, guildId?: string): Promise<boolean> {
@@ -88,15 +111,18 @@ export async function updatePingServersFilter(name: string, serverIds: string[],
 }
 
 export async function listPings(guildId?: string): Promise<PingRow[]> {
+    let rows: PingRow[];
     if (guildId) {
-        return await query(`SELECT * FROM pings WHERE guild_id = ? ORDER BY created_at DESC`, [guildId]) as PingRow[];
+        rows = await query(`SELECT * FROM pings WHERE guild_id = ? ORDER BY created_at DESC`, [guildId]) as PingRow[];
+    } else {
+        rows = await query(`SELECT * FROM pings ORDER BY created_at DESC`) as PingRow[];
     }
-    return await query(`SELECT * FROM pings ORDER BY created_at DESC`) as PingRow[];
+    return await Promise.all(rows.map(r=>decryptRow(r)));
 }
 
 export async function getAllPings(): Promise<PingRow[]> {
-    // @ts-ignore: Typings mysql2 absents sous Deno pour ce wrapper
-    return await query(`SELECT * FROM pings`) as PingRow[];
+    const rows = await query(`SELECT * FROM pings`) as PingRow[]; // @ts-ignore: Typings mysql2 absents sous Deno pour ce wrapper
+    return await Promise.all(rows.map(r=>decryptRow(r)));
 }
 
 export async function deletePing(name: string, guildId?: string): Promise<boolean> {
@@ -111,8 +137,8 @@ export async function updatePingCredentials(name: string, guildId: string | unde
     if(!ping) return false;
     const fields: string[] = [];
     const params: unknown[] = [];
-    if(appKey){ fields.push("app_key = ?"); params.push(appKey); }
-    if(clientKey){ fields.push("client_key = ?"); params.push(clientKey); }
+    if(appKey){ fields.push("app_key = ?"); params.push(await encryptForStorage(appKey)); }
+    if(clientKey){ fields.push("client_key = ?"); params.push(await encryptForStorage(clientKey)); }
     if(fields.length === 0) return true; // rien à faire
     params.push(ping.id);
     await query(`UPDATE pings SET ${fields.join(", ")} WHERE id = ?`, params);
