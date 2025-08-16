@@ -14,7 +14,7 @@ export default new Command({
         option
             .setName("public")
             .setNameLocalizations({
-                fr: "Public",
+                fr: "publique",
             })
             .setDescription("Reply shown to everyone (otherwise ephemeral).")
             .setDescriptionLocalizations({
