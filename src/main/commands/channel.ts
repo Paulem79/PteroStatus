@@ -76,12 +76,12 @@ export default new Command({
       return;
     }
 
-    if (ping.channel_id && ping.message_id) {
-      const oldChannel = interaction.client.channels.cache.get(ping.channel_id);
-      if (!oldChannel || !oldChannel.isSendable()) return;
-      const oldMessage = oldChannel?.messages.cache.get(ping.message_id);
-      if (!oldMessage) return;
-      await oldMessage.delete();
+    if(ping.channel_id) {
+        await interaction.reply({
+            content: "Salon déjà défini pour ce ping. Utilisez `/editping` pour le modifier.",
+            flags: MessageFlags.Ephemeral,
+        });
+        return;
     }
 
     const ok = await setPingChannel(ping.id, channel.id, guildId);
