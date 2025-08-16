@@ -12,38 +12,62 @@ export default new Command({
         .setDescription("Créer un ping pour un panel Pterodactyl")
         .addStringOption((option) =>
             option
-                .setName("nom")
-                .setDescription("Nom unique du ping")
+                .setName("name")
+                .setNameLocalizations({
+                    fr: "nom"
+                })
+                .setDescription("Unique name of the ping")
+                .setDescriptionLocalizations({
+                    fr: "Nom unique du ping"
+                })
                 .setRequired(true)
         )
         .addStringOption((option) =>
             option
                 .setName("baseurl")
-                .setDescription("URL de base du panel (ex: https://panel.exemple.com)")
+                .setNameLocalizations({
+                    fr: "url"
+                })
+                .setDescription("Base URL of the panel (eg: https://panel.example.com)")
+                .setDescriptionLocalizations({
+                    fr: "URL de base du panel (ex: https://panel.exemple.com)"
+                })
                 .setRequired(true)
         )
         .addStringOption((option) =>
             option
                 .setName("appkey")
-                .setDescription("Clé Application (Admin / Application API)")
+                .setNameLocalizations({
+                    fr: "cleapplication"
+                })
+                .setDescription("Api Key (Admin / API Keys)")
+                .setDescriptionLocalizations({
+                    fr: "Clé d'Application (Admin / API Keys)"
+                })
                 .setRequired(true)
         )
         .addStringOption((option) =>
             option
                 .setName("clientkey")
-                .setDescription("Clé Client (Utilisateur)")
+                .setNameLocalizations({
+                    fr: "cleclient"
+                })
+                .setDescription("Client Key (Profile / API Keys)")
+                .setDescriptionLocalizations({
+                    fr: "Clé Client (Profile / API Keys)"
+                })
                 .setRequired(true)
         ),
 
     async execute(interaction) {
         const guildId = interaction.guildId;
         if(!guildId) { await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
-        const name = interaction.options?.getString("nom", true)?.trim().toLowerCase() as string;
+        const name = interaction.options?.getString("name", true)?.trim().toLowerCase() as string;
         let baseurl = interaction.options?.getString("baseurl", true).trim();
         const appkey = interaction.options?.getString("appkey", true).trim();
         const clientkey = interaction.options?.getString("clientkey", true).trim();
 
-        if (!/^https?:\/\//i.test(baseurl)) baseurl = `https://${baseurl}`; // forcer schéma
+        if (!baseurl.includes("http") && !baseurl.includes("://")) baseurl = `https://${baseurl}`; // forcer schéma
         if (baseurl.endsWith('/')) baseurl = baseurl.slice(0, -1);
 
         if (name.length > 64) {

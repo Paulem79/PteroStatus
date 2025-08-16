@@ -75,13 +75,31 @@ export default new Command({
         .setContexts(InteractionContextType.Guild)
         .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
         .setName("shownnodes")
-        .setDescription("Afficher et gérer les nodes d'un ping via boutons")
-        .addStringOption(o=>o.setName("nom").setDescription("Nom du ping").setRequired(true).setAutocomplete(true)),
+        .setNameLocalizations({
+            fr: "montrernodes"
+        })
+        .setDescription("Show and manage nodes associated to the ping")
+        .setDescriptionLocalizations({
+            fr: "Afficher et gérer les nodes associés au ping"
+        })
+        .addStringOption(option=>
+            option
+                .setName("name")
+                .setNameLocalizations({
+                    fr: "nom"
+                })
+                .setDescription("Ping's name")
+                .setDescriptionLocalizations({
+                    fr: "Nom du ping"
+                })
+                .setRequired(true)
+                .setAutocomplete(true)
+        ),
 
     async execute(interaction) {
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
-        const name = interaction.options?.getString("nom", true)?.toLowerCase() ?? "";
+        const name = interaction.options?.getString("name", true)?.toLowerCase() ?? "";
         const ping = await getPing(name, guildId);
         if(!ping){ await interaction.reply({content: "Ping introuvable.", flags: MessageFlags.Ephemeral}); return; }
 
@@ -105,7 +123,7 @@ export default new Command({
     async autocomplete(interaction) {
         const guildId = interaction.guildId; if(!guildId){ await interaction.respond([]); return; }
         const focused = interaction.options.getFocused(true);
-        if(focused.name === 'nom') {
+        if(focused.name === 'name') {
             const value = focused.value.toLowerCase();
             const pings = await listPings(guildId);
             const filtered = pings.filter(p=>p.name.includes(value)).slice(0,25).map(p=>({name:p.name,value:p.name}));

@@ -17,7 +17,10 @@ export default new Command({
         .setContexts(InteractionContextType.Guild)
         .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
         .setName("pings")
-        .setDescription("Lister les pings du serveur")
+        .setDescription("List server pings")
+        .setDescriptionLocalizations({
+            fr: "Lister les pings du serveur",
+        })
         .addBooleanOption((option) =>
             option
                 .setName("public")

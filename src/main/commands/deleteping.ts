@@ -9,12 +9,24 @@ export default new Command({
         .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
         .setName("deleteping")
         .setDescription("Supprimer un ping")
-        .addStringOption(o=>o.setName("nom").setDescription("Nom du ping").setRequired(true).setAutocomplete(true)),
+        .addStringOption(option=>
+            option
+                .setName("name")
+                .setNameLocalizations({
+                    fr: "nom"
+                })
+                .setDescription("Ping's name")
+                .setDescriptionLocalizations({
+                    fr: "Nom du ping"
+                })
+                .setRequired(true)
+                .setAutocomplete(true)
+        ),
 
     async execute(interaction) {
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
-        const name = interaction.options.getString("nom", true).toLowerCase();
+        const name = interaction.options.getString("name", true).toLowerCase();
 
         const ping = await getPing(name, guildId);
         if(!ping){
@@ -49,7 +61,7 @@ export default new Command({
     async autocomplete(interaction) {
         const guildId = interaction.guildId; if(!guildId){ await interaction.respond([]); return; }
         const focused = interaction.options.getFocused(true);
-        if(focused.name !== 'nom') return;
+        if(focused.name !== 'name') return;
         const value = focused.value.toLowerCase();
         const pings = await listPings(guildId);
         await interaction.respond(pings

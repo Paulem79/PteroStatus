@@ -17,18 +17,61 @@ export default new Command({
         .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
         .setName("editping")
         .setDescription("Modifier les clés ou le salon d'un ping")
-        .addStringOption(o=>o.setName("nom").setDescription("Nom du ping").setRequired(true).setAutocomplete(true))
-        .addStringOption(o=>o.setName("appkey").setDescription("Nouvelle App Key (Application)").setRequired(false))
-        .addStringOption(o=>o.setName("clientkey").setDescription("Nouvelle Client Key (Utilisateur)").setRequired(false))
-        .addChannelOption(o=>o.setName("salon").setDescription("Nouveau salon").addChannelTypes(ChannelType.GuildText).setRequired(false)),
+        .addStringOption(option=>
+            option
+                .setName("name")
+                .setNameLocalizations({
+                    fr: "nom"
+                })
+                .setDescription("Ping's name")
+                .setDescriptionLocalizations({
+                    fr: "Nom du ping"
+                })
+                .setRequired(true)
+                .setAutocomplete(true)
+        )
+        .addStringOption(option=>
+            option
+                .setName("appkey")
+                .setDescription("The new app key (Admin / API Keys)")
+                .setDescriptionLocalizations({
+                    fr: "La nouvelle clé d'application (Admin / API Keys)"
+                })
+                .setRequired(false)
+        )
+        .addStringOption(option=>
+            option
+                .setName("clientkey")
+                .setNameLocalizations({
+                    fr: "cleclient"
+                })
+                .setDescription("The new client key (Profile / API Keys)")
+                .setDescriptionLocalizations({
+                    fr: "La nouvelle clé client (Profile / API Keys)"
+                })
+                .setRequired(false)
+        )
+        .addChannelOption(option=>
+            option
+                .setName("channel")
+                .setNameLocalizations({
+                    fr: "salon"
+                })
+                .setDescription("The new channel to associate with the ping")
+                .setDescriptionLocalizations({
+                    fr: "Le nouveau salon à associer au ping"
+                })
+                .addChannelTypes(ChannelType.GuildText)
+                .setRequired(false)
+        ),
 
     async execute(interaction) {
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
-        const name = interaction.options?.getString("nom", true)?.toLowerCase() ?? "";
+        const name = interaction.options?.getString("name", true)?.toLowerCase() ?? "";
         const newAppKey = interaction.options?.getString("appkey")?.trim();
         const newClientKey = interaction.options?.getString("clientkey")?.trim();
-        const newChannel = interaction.options?.getChannel("salon") ?? null;
+        const newChannel = interaction.options?.getChannel("channel") ?? null;
 
         if(!newAppKey && !newClientKey && !newChannel){
             await interaction.reply({content:"Aucun changement fourni.", flags: MessageFlags.Ephemeral});
@@ -89,7 +132,7 @@ export default new Command({
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.respond([]); return; }
         const focused = interaction.options.getFocused(true);
-        if(focused.name !== 'nom') return;
+        if(focused.name !== 'name') return;
         const value = focused.value.toLowerCase();
         const pings = await listPings(guildId);
         const filtered = pings

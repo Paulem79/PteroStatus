@@ -82,14 +82,44 @@ export default new Command({
         .setContexts(InteractionContextType.Guild)
         .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
         .setName("shownservers")
-        .setDescription("Afficher et gérer les serveurs d'un node via boutons")
-        .addStringOption(o=>o.setName("nom").setDescription("Nom du ping").setRequired(true).setAutocomplete(true))
-        .addIntegerOption(o=>o.setName("nodeid").setDescription("ID numérique du node").setRequired(true).setAutocomplete(true)),
+        .setNameLocalizations({
+            fr: "montrerserveurs"
+        })
+        .setDescription("Show and manage servers of a node associated to a ping.")
+        .setDescriptionLocalizations({
+            fr: "Afficher et gérer les serveurs d'un node associé à un ping."
+        })
+        .addStringOption(option=>
+            option
+                .setName("name")
+                .setNameLocalizations({
+                    fr: "nom"
+                })
+                .setDescription("Ping's name")
+                .setDescriptionLocalizations({
+                    fr: "Nom du ping"
+                })
+                .setRequired(true)
+                .setAutocomplete(true)
+        )
+        .addIntegerOption(option=>
+            option
+                .setName("nodeid")
+                .setNameLocalizations({
+                    fr: "idnode"
+                })
+                .setDescription("Node's ID")
+                .setDescriptionLocalizations({
+                    fr: "ID du node"
+                })
+                .setRequired(true)
+                .setAutocomplete(true)
+        ),
 
     async execute(interaction) {
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
-        const name = interaction.options?.getString("nom", true)?.toLowerCase() ?? "";
+        const name = interaction.options?.getString("name", true)?.toLowerCase() ?? "";
         const nodeId = interaction.options?.getInteger("nodeid", true)!;
         const ping = await getPing(name, guildId);
         if(!ping){ await interaction.reply({content: "Ping introuvable.", flags: MessageFlags.Ephemeral}); return; }
@@ -109,14 +139,14 @@ export default new Command({
         const focused = interaction.options.getFocused(true);
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.respond([]); return; }
-        if(focused.name === 'nom') {
+        if(focused.name === 'name') {
             const value = focused.value.toLowerCase();
             const pings = await listPings(guildId);
             const filtered = pings.filter(p=>p.name.includes(value)).slice(0,25).map(p=>({name:p.name,value:p.name}));
             await interaction.respond(filtered); return;
         }
         if(focused.name === 'nodeid') {
-            const pingNameRaw = interaction.options.getString('nom');
+            const pingNameRaw = interaction.options.getString('name');
             if(!pingNameRaw){ await interaction.respond([]); return; }
             const ping = await getPing(pingNameRaw.toLowerCase(), guildId);
             if(!ping){ await interaction.respond([]); return; }
