@@ -11,7 +11,7 @@ export interface Nodes extends HttpException {
   data: [
     {
       object: string;
-      attributes: NodeAttributes
+      attributes: NodeAttributes;
     },
   ];
   meta: {
@@ -27,51 +27,52 @@ export interface Nodes extends HttpException {
 }
 
 export interface DetailedNodeAttributes {
-    allocated_resources: {
-        memory: number;
-        disk: number;
-        cpu: number;
-    } | null;
-    relationships: {
-        allocations: { object: "list"; data: object[] };
-        servers: { object: "list"; data: ServerResponse[] };
-    };
+  allocated_resources: {
+    memory: number;
+    disk: number;
+    cpu: number;
+  } | null;
+  relationships: {
+    allocations: { object: "list"; data: object[] };
+    servers: { object: "list"; data: ServerResponse[] };
+  };
 }
 
 export interface NodeAttributes {
-    id: number;
-    uuid: string;
-    public: boolean;
-    name: string;
-    description: string | null;
-    location_id: number | null;
-    fqdn: string;
-    scheme: "https" | "http";
-    behind_proxy: boolean;
-    maintenance_mode: boolean;
-    memory: number;
-    memory_overallocate: number;
-    disk: number;
-    disk_overallocate: number;
-    upload_size: number;
-    daemon_listen: number;
-    daemon_sftp: number;
-    daemon_connect: number;
-    daemon_base: string;
-    created_at: string;
-    updated_at: string;
-    tags: [] | null;
-    cpu: number | null;
-    cpu_overallocate: number | null;
-    daemon_sftp_alias: string | null;
+  id: number;
+  uuid: string;
+  public: boolean;
+  name: string;
+  description: string | null;
+  location_id: number | null;
+  fqdn: string;
+  scheme: "https" | "http";
+  behind_proxy: boolean;
+  maintenance_mode: boolean;
+  memory: number;
+  memory_overallocate: number;
+  disk: number;
+  disk_overallocate: number;
+  upload_size: number;
+  daemon_listen: number;
+  daemon_sftp: number;
+  daemon_connect: number;
+  daemon_base: string;
+  created_at: string;
+  updated_at: string;
+  tags: [] | null;
+  cpu: number | null;
+  cpu_overallocate: number | null;
+  daemon_sftp_alias: string | null;
 }
 
-export interface SingleNodeAttributes extends NodeAttributes, DetailedNodeAttributes {
+export interface SingleNodeAttributes
+  extends NodeAttributes, DetailedNodeAttributes {
 }
 
 export interface SingleNode extends HttpException {
   object: "node";
-  attributes: SingleNodeAttributes
+  attributes: SingleNodeAttributes;
 }
 
 export interface ServerResponse extends HttpException {

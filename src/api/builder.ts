@@ -1,40 +1,44 @@
-import {BitFieldResolvable, ChatInputCommandInteraction, MessageFlags,} from "../deps.ts";
+import {
+  BitFieldResolvable,
+  ChatInputCommandInteraction,
+  MessageFlags,
+} from "../deps.ts";
 
 export class MessageBuilder {
-    private lines: string[] = [];
+  private lines: string[] = [];
 
-    line(line: string): this {
-        this.lines.push(line);
-        return this;
-    }
+  line(line: string): this {
+    this.lines.push(line);
+    return this;
+  }
 
-    length(): number {
-        return this.lines.length;
-    }
+  length(): number {
+    return this.lines.length;
+  }
 
-    getLines(): string[] {
-        return this.lines;
-    }
+  getLines(): string[] {
+    return this.lines;
+  }
 
-    build(): string {
-        return this.lines.join("\n");
-    }
+  build(): string {
+    return this.lines.join("\n");
+  }
 
-    reply(
-        interaction: ChatInputCommandInteraction<"cached">,
-        flags?:
-            | BitFieldResolvable<
-            | "SuppressEmbeds"
-            | "Ephemeral"
-            | "SuppressNotifications"
-            | "IsComponentsV2",
-            | MessageFlags.SuppressEmbeds
-            | MessageFlags.Ephemeral
-            | MessageFlags.SuppressNotifications
-            | MessageFlags.IsComponentsV2
-        >
-            | undefined,
-    ) {
-        return interaction.reply({ content: this.build(), flags: flags });
-    }
+  reply(
+    interaction: ChatInputCommandInteraction<"cached">,
+    flags?:
+      | BitFieldResolvable<
+        | "SuppressEmbeds"
+        | "Ephemeral"
+        | "SuppressNotifications"
+        | "IsComponentsV2",
+        | MessageFlags.SuppressEmbeds
+        | MessageFlags.Ephemeral
+        | MessageFlags.SuppressNotifications
+        | MessageFlags.IsComponentsV2
+      >
+      | undefined,
+  ) {
+    return interaction.reply({ content: this.build(), flags: flags });
+  }
 }

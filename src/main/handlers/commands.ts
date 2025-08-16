@@ -1,12 +1,12 @@
 import {
-    AnySelectMenuInteraction,
-    ApplicationCommandDataResolvable,
-    AutocompleteInteraction,
-    ButtonInteraction,
-    ChatInputCommandInteraction,
-    Client,
-    ModalSubmitInteraction,
-    SlashCommandOptionsOnlyBuilder,
+  AnySelectMenuInteraction,
+  ApplicationCommandDataResolvable,
+  AutocompleteInteraction,
+  ButtonInteraction,
+  ChatInputCommandInteraction,
+  Client,
+  ModalSubmitInteraction,
+  SlashCommandOptionsOnlyBuilder,
 } from "../../deps.ts";
 import path from "node:path";
 import fs from "node:fs";

@@ -1,4 +1,4 @@
-import {ChatInputCommandInteraction} from "../deps.ts";
+import { ChatInputCommandInteraction } from "../deps.ts";
 
 export class PingSystem {
   private interaction: ChatInputCommandInteraction<"cached">;

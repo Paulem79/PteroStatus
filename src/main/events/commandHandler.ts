@@ -1,9 +1,9 @@
 // noinspection JSUnusedGlobalSymbols
 
-import {Collection, Events} from "../../deps.ts";
+import { Collection, Events } from "../../deps.ts";
 
-import {HandledEvent} from "../handlers/events.ts";
-import {commands, cooldowns, defaultButtons} from "../main.ts";
+import { HandledEvent } from "../handlers/events.ts";
+import { commands, cooldowns, defaultButtons } from "../main.ts";
 
 const defaultCooldownDuration = 3;
 
