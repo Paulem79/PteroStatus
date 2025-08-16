@@ -9,7 +9,7 @@ import {
     PermissionsBitField,
     SlashCommandBuilder
 } from "../../deps.ts";
-import {getPing, listPings, updatePingNodesFilter} from "../sql/requests.ts";
+import {getPing, listPings, PingRow, updatePingNodesFilter} from "../sql/requests.ts";
 import {getNodes} from "../../api/pterodactyl.ts";
 import {startPinger, triggerPingUpdate} from "../pinger.ts";
 import {NodeAttributes, Nodes} from "../../api/pterodactyl_types.ts";
@@ -18,11 +18,11 @@ import {NodeAttributes, Nodes} from "../../api/pterodactyl_types.ts";
 const nodesCache = new Map<string, { at: number; nodes: NodeAttributes[] }>();
 const PAGE_SIZE_NODES = 25;
 
-function buildNodesEmbed(pingName: string, nodes: NodeAttributes[], included: number[], page: number) {
+function buildNodesEmbed(ping: PingRow, nodes: NodeAttributes[], included: number[], page: number) {
     const totalPages = Math.max(1, Math.ceil(nodes.length / PAGE_SIZE_NODES));
     const slice = nodes.slice(page * PAGE_SIZE_NODES, page * PAGE_SIZE_NODES + PAGE_SIZE_NODES);
     const embed = new EmbedBuilder()
-        .setTitle(`Gestion des nodes • ${pingName}`)
+        .setTitle(`Gestion des nodes • ${ping.name}`)
         .setDescription(`Cliquez pour ajouter/enlever un node du filtre. Page ${page+1}/${totalPages}`)
         .setTimestamp();
     for (const n of slice) {
@@ -33,7 +33,7 @@ function buildNodesEmbed(pingName: string, nodes: NodeAttributes[], included: nu
     return embed;
 }
 
-function buildNodeButtons(nodes: NodeAttributes[], included: number[], pingName: string, guildId: string, page: number) {
+function buildNodeButtons(nodes: NodeAttributes[], included: number[], ping: PingRow, guildId: string, page: number) {
     const rows: ActionRowBuilder<ButtonBuilder>[] = [];
     const totalPages = Math.max(1, Math.ceil(nodes.length / PAGE_SIZE_NODES));
     const slice = nodes.slice(page * PAGE_SIZE_NODES, page * PAGE_SIZE_NODES + PAGE_SIZE_NODES);
@@ -41,7 +41,7 @@ function buildNodeButtons(nodes: NodeAttributes[], included: number[], pingName:
     for (const n of slice) {
         const inside = included.includes(n.id);
         const btn = new ButtonBuilder()
-            .setCustomId(`pn|n|${guildId}|${pingName}|${n.id}`)
+            .setCustomId(`pn|n|${guildId}|${ping.id}|${n.id}`)
             .setLabel(`#${n.id}`)
             .setStyle(inside ? ButtonStyle.Primary : ButtonStyle.Secondary);
         current.push(btn);
@@ -51,7 +51,7 @@ function buildNodeButtons(nodes: NodeAttributes[], included: number[], pingName:
     if (totalPages > 1) {
         const nav: ButtonBuilder[] = [];
         nav.push(new ButtonBuilder()
-            .setCustomId(`pn|p|${guildId}|${pingName}|${Math.max(0, page-1)}`)
+            .setCustomId(`pn|p|${guildId}|${ping.id}|${Math.max(0, page-1)}`)
             .setLabel('◀')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(page===0));
@@ -61,7 +61,7 @@ function buildNodeButtons(nodes: NodeAttributes[], included: number[], pingName:
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(true));
         nav.push(new ButtonBuilder()
-            .setCustomId(`pn|p|${guildId}|${pingName}|${Math.min(totalPages-1, page+1)}`)
+            .setCustomId(`pn|p|${guildId}|${ping.id}|${Math.min(totalPages-1, page+1)}`)
             .setLabel('▶')
             .setStyle(ButtonStyle.Secondary)
             .setDisabled(page===totalPages-1));
@@ -82,15 +82,15 @@ export default new Command({
         .setDescriptionLocalizations({
             fr: "Afficher et gérer les nodes associés au ping"
         })
-        .addStringOption(option=>
+        .addNumberOption(option =>
             option
-                .setName("name")
+                .setName("id")
                 .setNameLocalizations({
-                    fr: "nom"
+                    fr: "identifiant"
                 })
-                .setDescription("Ping's name")
+                .setDescription("Ping's id")
                 .setDescriptionLocalizations({
-                    fr: "Nom du ping"
+                    fr: "Identifiant du ping"
                 })
                 .setRequired(true)
                 .setAutocomplete(true)
@@ -99,12 +99,12 @@ export default new Command({
     async execute(interaction) {
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
-        const name = interaction.options?.getString("name", true)?.toLowerCase() ?? "";
-        const ping = await getPing(name, guildId);
+        const id = interaction.options?.getNumber("id", true);
+        const ping = await getPing(id, guildId);
         if(!ping){ await interaction.reply({content: "Ping introuvable.", flags: MessageFlags.Ephemeral}); return; }
 
         // get / cache nodes
-        const cacheKey = `${guildId}:${name}`;
+        const cacheKey = `${guildId}:${id}`;
         const now = Date.now();
         let entry = nodesCache.get(cacheKey);
         if(!entry || (now - entry.at) > 30_000){
@@ -115,18 +115,24 @@ export default new Command({
         }
         const included = ping.nodes_filter ? JSON.parse(ping.nodes_filter) as number[] : [];
         const page = 0;
-        const embed = buildNodesEmbed(name, entry.nodes, included, page);
-        const components = buildNodeButtons(entry.nodes, included, name, guildId, page);
+        const embed = buildNodesEmbed(ping, entry.nodes, included, page);
+        const components = buildNodeButtons(entry.nodes, included, ping, guildId, page);
         await interaction.reply({ embeds:[embed], components, flags: MessageFlags.Ephemeral });
     },
 
     async autocomplete(interaction) {
-        const guildId = interaction.guildId; if(!guildId){ await interaction.respond([]); return; }
+        const guildId = interaction.guildId;
+        if(!guildId){
+            await interaction.respond([]);
+            return;
+        }
         const focused = interaction.options.getFocused(true);
-        if(focused.name === 'name') {
-            const value = focused.value.toLowerCase();
+        if(focused.name === 'id') {
             const pings = await listPings(guildId);
-            const filtered = pings.filter(p=>p.name.includes(value)).slice(0,25).map(p=>({name:p.name,value:p.name}));
+            const filtered = pings
+                .filter(p=> p.id.toString().includes(focused.value))
+                .slice(0,25)
+                .map(p=>({ name:p.name, value:p.id }));
             await interaction.respond(filtered);
         }
     },
@@ -136,11 +142,12 @@ export default new Command({
         if(parts[0] !== 'pn') return;
         if(parts[1] === 'noop') { await interaction.deferUpdate(); return; }
         if(parts[1] === 'p') {
-            const [, , guildId, pingName, pageRaw] = parts;
+            const [, , guildId, idName, pageRaw] = parts;
+            const id = Number(idName);
             if(interaction.guildId !== guildId){ await interaction.reply({content:"Contexte invalide.", flags: MessageFlags.Ephemeral }); return; }
-            const ping = await getPing(pingName, guildId);
+            const ping = await getPing(id, guildId);
             if(!ping){ await interaction.reply({content:"Ping introuvable.", flags: MessageFlags.Ephemeral }); return; }
-            const cacheKey = `${guildId}:${pingName}`;
+            const cacheKey = `${guildId}:${id}`;
             let entry = nodesCache.get(cacheKey);
             const now = Date.now();
             if(!entry || (now - entry.at) > 30_000){
@@ -149,21 +156,22 @@ export default new Command({
             }
             const included = ping.nodes_filter ? JSON.parse(ping.nodes_filter) as number[] : [];
             const page = Number(pageRaw);
-            const embed = buildNodesEmbed(pingName, entry?.nodes ?? [], included, page);
-            const components = buildNodeButtons(entry?.nodes ?? [], included, pingName, guildId, page);
+            const embed = buildNodesEmbed(ping, entry?.nodes ?? [], included, page);
+            const components = buildNodeButtons(entry?.nodes ?? [], included, ping, guildId, page);
             try { await interaction.update({ embeds:[embed], components }); } catch { await interaction.reply({ embeds:[embed], components, flags: MessageFlags.Ephemeral  }); }
             return;
         }
         if(parts[1] === 'n') {
-            const [, , guildId, pingName, nodeIdRaw] = parts;
+            const [, , guildId, idName, nodeIdRaw] = parts;
+            const id = Number(idName);
             if(interaction.guildId !== guildId){ await interaction.reply({ content: "Contexte invalide.", flags: MessageFlags.Ephemeral  }); return; }
-            const ping = await getPing(pingName, guildId);
+            const ping = await getPing(id, guildId);
             if(!ping){ await interaction.reply({ content: "Ping introuvable.", flags: MessageFlags.Ephemeral  }); return; }
             const nodeId = Number(nodeIdRaw);
             let current = ping.nodes_filter ? JSON.parse(ping.nodes_filter) as number[] : [];
             if(current.includes(nodeId)) current = current.filter(n=>n!==nodeId); else current.push(nodeId);
-            await updatePingNodesFilter(pingName, current, guildId);
-            const cacheKey = `${guildId}:${pingName}`;
+            await updatePingNodesFilter(ping.id, current, guildId);
+            const cacheKey = `${guildId}:${id}`;
             let entry = nodesCache.get(cacheKey);
             const now = Date.now();
             if(!entry || (now - entry.at) > 30_000){
@@ -178,8 +186,8 @@ export default new Command({
             const footerField = interaction.message.embeds[0]?.description ?? '';
             const match = footerField.match(/Page (\d+)\/(\d+)/i);
             const currentPage = match ? Math.max(0, parseInt(match[1])-1) : 0;
-            const embed = buildNodesEmbed(pingName, nodes, current, currentPage);
-            const components = buildNodeButtons(nodes, current, pingName, guildId, currentPage);
+            const embed = buildNodesEmbed(ping, nodes, current, currentPage);
+            const components = buildNodeButtons(nodes, current, ping, guildId, currentPage);
             try {
                 await interaction.update({ embeds:[embed], components });
             } catch {

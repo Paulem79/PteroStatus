@@ -24,15 +24,15 @@ export default new Command({
         .setDescriptionLocalizations({
             fr: "Associer un salon Discord où le statut du ping sera envoyé.",
         })
-        .addStringOption(option =>
+        .addNumberOption(option =>
             option
-                .setName("name")
+                .setName("id")
                 .setNameLocalizations({
-                    fr: "nom"
+                    fr: "identifiant"
                 })
-                .setDescription("Ping's name")
+                .setDescription("Ping's id")
                 .setDescriptionLocalizations({
-                    fr: "Nom du ping"
+                    fr: "Identifiant du ping"
                 })
                 .setRequired(true)
                 .setAutocomplete(true)
@@ -54,38 +54,43 @@ export default new Command({
     async execute(interaction) {
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
-        const name = interaction.options?.getString("name", true)?.toLowerCase() ?? "";
+        const id = interaction.options?.getNumber("id", true);
         const channel = interaction.options?.getChannel("channel", true)!;
 
-        const ping = await getPing(name, guildId);
+        const ping = await getPing(id, guildId);
         if(!ping){
             await interaction.reply({content: "Ping introuvable.", flags: MessageFlags.Ephemeral});
             return;
         }
 
-        const ok = await setPingChannel(name, channel.id, guildId);
+        if(ping.channel_id) {
+            await interaction.reply({content: "Le salon est déjà défini.", flags: MessageFlags.Ephemeral});
+            return;
+        }
+
+        const ok = await setPingChannel(ping.id, channel.id, guildId);
         if(!ok){
             await interaction.reply({content: "Impossible de mettre à jour le salon.", flags: MessageFlags.Ephemeral});
             return;
         }
 
         const mb = new MessageBuilder()
-            .line(`🔗 Salon associé pour **${name}** → <#${channel.id}>`);
+            .line(`🔗 Salon associé pour **${ping.name}** → <#${channel.id}>`);
         await mb.reply(interaction, MessageFlags.Ephemeral);
-        await startPinger(interaction.client, name);
+        await startPinger(interaction.client, ping.id, guildId);
     },
 
     async autocomplete(interaction) {
         const guildId = interaction.guildId;
         if(!guildId) { await interaction.respond([]); return; }
         const focused = interaction.options.getFocused(true);
-        if (focused.name !== 'name') return;
+        if (focused.name !== 'id') return;
         const value = focused.value.toLowerCase();
         const pings = await listPings(guildId);
         const filtered = pings
             .filter(p=> p.name.toLowerCase().includes(value))
             .slice(0, 25)
-            .map(p=>({ name: p.name, value: p.name }));
+            .map(p=>({ name: p.name, value: p.id }));
         await interaction.respond(filtered);
     }
 });

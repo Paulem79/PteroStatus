@@ -72,40 +72,30 @@ export async function createPing(name: string, baseUrl: string, appKey: string, 
     }
 }
 
-export async function getPing(name: string, guildId?: string): Promise<PingRow | undefined> {
-    let rows: PingRow[];
-    if (guildId) {
-        rows = await query(`SELECT * FROM pings WHERE name = ? AND guild_id = ? LIMIT 1`, [name, guildId]) as PingRow[];
-    } else {
-        rows = await query(`SELECT * FROM pings WHERE name = ? LIMIT 1`, [name]) as PingRow[];
-    }
-    const row = rows[0];
-    if(!row) return undefined;
-    return await decryptRow(row);
-}
-
-export async function setPingChannel(name: string, channelId: string, guildId?: string): Promise<boolean> {
-    const ping = await getPing(name, guildId);
-    if (!ping) return false;
+export async function setPingChannel(id: number, channelId: string, guildId: string): Promise<boolean> {
+    const ping = await getPingById(id);
+    if (!ping || ping.guild_id != guildId) return false;
     await query(`UPDATE pings SET channel_id = ? WHERE id = ?`, [channelId, ping.id]);
     return true;
 }
 
-export async function setPingMessageId(id: number, messageId: string) {
+export async function setPingMessageId(id: number, messageId: string, guildId?: string) {
+    const ping = await getPingById(id);
+    if (!ping || (!guildId || ping.guild_id != guildId)) return false;
     await query(`UPDATE pings SET message_id = ? WHERE id = ?`, [messageId, id]);
     return true;
 }
 
-export async function updatePingNodesFilter(name: string, nodeIds: number[], guildId?: string) {
-    const ping = await getPing(name, guildId);
-    if(!ping) return false;
+export async function updatePingNodesFilter(id: number, nodeIds: number[], guildId: string) {
+    const ping = await getPingById(id);
+    if (!ping || ping.guild_id != guildId) return false;
     await query(`UPDATE pings SET nodes_filter = ? WHERE id = ?`, [JSON.stringify(nodeIds), ping.id]);
     return true;
 }
 
-export async function updatePingServersFilter(name: string, serverIds: string[], guildId?: string) {
-    const ping = await getPing(name, guildId);
-    if(!ping) return false;
+export async function updatePingServersFilter(id: number, serverIds: string[], guildId: string) {
+    const ping = await getPingById(id);
+    if (!ping || ping.guild_id != guildId) return false;
     await query(`UPDATE pings SET servers_filter = ? WHERE id = ?`, [JSON.stringify(serverIds), ping.id]);
     return true;
 }
@@ -125,16 +115,16 @@ export async function getAllPings(): Promise<PingRow[]> {
     return await Promise.all(rows.map(r=>decryptRow(r)));
 }
 
-export async function deletePing(name: string, guildId?: string): Promise<boolean> {
-    const ping = await getPing(name, guildId);
-    if(!ping) return false;
+export async function deletePing(id: number, guildId: string): Promise<boolean> {
+    const ping = await getPingById(id);
+    if (!ping || ping.guild_id != guildId) return false;
     await query(`DELETE FROM pings WHERE id = ?`, [ping.id]);
     return true;
 }
 
-export async function updatePingCredentials(name: string, guildId: string | undefined, appKey?: string, clientKey?: string): Promise<boolean> {
-    const ping = await getPing(name, guildId);
-    if(!ping) return false;
+export async function updatePingCredentials(id: number, guildId: string, appKey?: string, clientKey?: string): Promise<boolean> {
+    const ping = await getPingById(id);
+    if (!ping || ping.guild_id != guildId) return false;
     const fields: string[] = [];
     const params: unknown[] = [];
     if(appKey){ fields.push("app_key = ?"); params.push(await encryptForStorage(appKey)); }
@@ -145,7 +135,7 @@ export async function updatePingCredentials(name: string, guildId: string | unde
     return true;
 }
 
-export async function getPingById(id: number): Promise<PingRow | undefined> {
+async function getPingById(id: number): Promise<PingRow | undefined> {
     const rows = await query(`SELECT * FROM pings WHERE id = ? LIMIT 1`, [id]) as PingRow[];
     const row = rows[0];
 
@@ -154,10 +144,15 @@ export async function getPingById(id: number): Promise<PingRow | undefined> {
     return await decryptRow(row);
 }
 
-export async function updatePingName(id: number, name: string): Promise<boolean> {
+export async function getPing(id: number, guildId: string): Promise<PingRow | undefined> {
     const ping = await getPingById(id);
+    if (!ping || ping.guild_id != guildId) return undefined;
+    return ping;
+}
 
-    if(!ping) return false;
+export async function updatePingName(id: number, name: string, guildId: string): Promise<boolean> {
+    const ping = await getPingById(id);
+    if (!ping || ping.guild_id != guildId) return false;
 
     await query(`UPDATE pings SET name = ? WHERE id = ?`, [name, id]);
     return true;

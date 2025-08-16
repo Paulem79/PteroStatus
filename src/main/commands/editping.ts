@@ -19,15 +19,15 @@ export default new Command({
         .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
         .setName("editping")
         .setDescription("Modifier les clés ou le salon d'un ping")
-        .addStringOption(option=>
+        .addNumberOption(option =>
             option
-                .setName("name")
+                .setName("id")
                 .setNameLocalizations({
-                    fr: "nom"
+                    fr: "identifiant"
                 })
-                .setDescription("Ping's name")
+                .setDescription("Ping's id")
                 .setDescriptionLocalizations({
-                    fr: "Nom du ping"
+                    fr: "Identifiant du ping"
                 })
                 .setRequired(true)
                 .setAutocomplete(true)
@@ -82,7 +82,7 @@ export default new Command({
     async execute(interaction) {
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
-        let name = interaction.options?.getString("name", true)?.toLowerCase() ?? "";
+        const id = interaction.options?.getNumber("id", true);
         const newName = interaction.options?.getString("newname")?.trim().toLowerCase();
         const newAppKey = interaction.options?.getString("appkey")?.trim();
         const newClientKey = interaction.options?.getString("clientkey")?.trim();
@@ -93,7 +93,7 @@ export default new Command({
             return;
         }
 
-        const ping = await getPing(name, guildId);
+        const ping = await getPing(id, guildId);
         if(!ping){
             await interaction.reply({content:"Ping introuvable.", flags: MessageFlags.Ephemeral});
             return;
@@ -111,17 +111,17 @@ export default new Command({
         // Appliquer mises à jour
         const messageBuilder = new MessageBuilder();
         if(newName || newName === ping.name){
-            const ok = await updatePingName(ping.id, newName);
+            const ok = await updatePingName(ping.id, newName, guildId);
             if(!ok){
                 await interaction.reply({content:"Échec mise à jour du nom.", flags: MessageFlags.Ephemeral});
                 return;
             }
             messageBuilder.line("🏷️ Nom mis à jour");
-            name = newName;
+            ping.name = newName;
         }
 
         if(newAppKey || newClientKey){
-            const ok = await updatePingCredentials(name, guildId, newAppKey, newClientKey);
+            const ok = await updatePingCredentials(ping.id, guildId, newAppKey, newClientKey);
             if(!ok){
                 await interaction.reply({content:"Échec mise à jour des clés.", flags: MessageFlags.Ephemeral});
                 return;
@@ -131,7 +131,7 @@ export default new Command({
         }
 
         if(newChannel){
-            const ok = await setPingChannel(name, newChannel.id, guildId);
+            const ok = await setPingChannel(ping.id, newChannel.id, guildId);
             if(!ok){
                 await interaction.reply({content:"Échec mise à jour du salon.", flags: MessageFlags.Ephemeral});
                 return;
@@ -141,11 +141,11 @@ export default new Command({
 
         // Redémarrer pinger si quelque chose change et qu'un channel est défini (après potentielle MAJ)
         if((newAppKey || newClientKey || newChannel) && (newChannel?.id || ping.channel_id)){
-            await startPinger(interaction.client, name, guildId);
+            await startPinger(interaction.client, ping.id, guildId);
         }
 
         const mb = new MessageBuilder()
-            .line(`✏️ Modifications pour **${name}**:`);
+            .line(`✏️ Modifications pour **${ping.name}**:`);
         if(messageBuilder.length() === 0)
             mb.line("(Aucun changement appliqué)");
         else
@@ -158,13 +158,13 @@ export default new Command({
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.respond([]); return; }
         const focused = interaction.options.getFocused(true);
-        if(focused.name !== 'name') return;
+        if(focused.name !== 'id') return;
         const value = focused.value.toLowerCase();
         const pings = await listPings(guildId);
         const filtered = pings
             .filter(p=> p.name.toLowerCase().includes(value))
             .slice(0,25)
-            .map(p=>({ name: p.name, value: p.name }));
+            .map(p=>({ name: p.name, value: p.id }));
         await interaction.respond(filtered);
     }
 });

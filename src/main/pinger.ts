@@ -17,7 +17,9 @@ export async function startAllPingers(client: Client<true>) {
 }
 
 export async function startPinger(client: Client<true>, id: number, guildId?: string) {
-    const key = `${guildId || 'global'}:${id}`;
+    if(!guildId) guildId = "global";
+
+    const key = `${guildId}:${id}`;
     stopPinger(id, guildId);
     const pings = await getAllPings();
     const ping = pings.find(p=>p.id===id && (guildId ? p.guild_id === guildId : true));
@@ -33,7 +35,7 @@ export async function startPinger(client: Client<true>, id: number, guildId?: st
     if(!messageId) {
         const sent = await channel.send({ content: `Initialisation du statut (${ping.name})...` });
         messageId = sent.id;
-        await setPingMessageId(ping.id, messageId);
+        await setPingMessageId(ping.id, messageId, guildId);
     }
 
     try {
@@ -52,8 +54,8 @@ export async function startPinger(client: Client<true>, id: number, guildId?: st
     running.set(key, { interval: interval as unknown as number });
 }
 
-export function stopPinger(id: number, guildId?: string) {
-    const key = `${guildId || 'global'}:${id}`;
+export function stopPinger(id: number, guildId: string) {
+    const key = `${guildId}:${id}`;
     const r = running.get(key);
 
     if(r) {
@@ -62,14 +64,14 @@ export function stopPinger(id: number, guildId?: string) {
     }
 }
 
-export async function triggerPingUpdate(client: Client<true>, id: number, guildId?: string) {
+export async function triggerPingUpdate(client: Client<true>, id: number, guildId: string) {
     const pings = await getAllPings();
     const ping = pings.find(p=>p.id===id && (guildId ? p.guild_id === guildId : true));
     if(!ping || !ping.message_id) return;
     await updatePingMessage(id, client, ping.message_id, guildId);
 }
 
-async function updatePingMessage(id: number, client: Client<true>, messageId: string, guildId?: string): Promise<string> {
+async function updatePingMessage(id: number, client: Client<true>, messageId: string, guildId: string): Promise<string> {
     const pings = await getAllPings();
 
     const ping = pings.find(p=>p.id===id && (guildId ? p.guild_id === guildId : true));

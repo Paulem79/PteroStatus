@@ -2,7 +2,7 @@
 
 import {Command} from "../handlers/commands.ts";
 import {InteractionContextType, MessageFlags, PermissionsBitField, SlashCommandBuilder} from "../../deps.ts";
-import {createPing, getPing} from "../sql/requests.ts";
+import {createPing, getPing, listPings} from "../sql/requests.ts";
 import {getNodes} from "../../api/pterodactyl.ts";
 import {MessageBuilder} from "../../api/builder.ts";
 
@@ -64,7 +64,7 @@ export default new Command({
     async execute(interaction) {
         const guildId = interaction.guildId;
         if(!guildId) { await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
-        const name = interaction.options?.getString("name", true)?.trim().toLowerCase() as string;
+        const name = interaction.options?.getString("name", true)?.trim();
         let baseurl = interaction.options?.getString("baseurl", true).trim();
         const appkey = interaction.options?.getString("appkey", true).trim();
         const clientkey = interaction.options?.getString("clientkey", true).trim();
@@ -78,7 +78,7 @@ export default new Command({
         }
 
         // Collision locale
-        if (await getPing(name, guildId)) {
+        if ((await listPings(guildId)).find((p) => p.name === name)) {
             await interaction.reply({content: "Un ping avec ce nom existe déjà sur cette guilde.", flags: MessageFlags.Ephemeral});
             return;
         }

@@ -9,7 +9,7 @@ import {
     PermissionsBitField,
     SlashCommandBuilder
 } from "../../deps.ts";
-import {getPing, listPings, updatePingServersFilter} from "../sql/requests.ts";
+import {getPing, listPings, PingRow, updatePingServersFilter} from "../sql/requests.ts";
 import {getNode, getNodes} from "../../api/pterodactyl.ts";
 import {startPinger, triggerPingUpdate} from "../pinger.ts";
 import {NodeAttributes, SingleNode} from "../../api/pterodactyl_types.ts";
@@ -32,11 +32,11 @@ function serverKey(serverMini: ServerMini): string {
 
 const PAGE_SIZE_SERVERS = 25;
 
-function buildServersEmbed(pingName: string, nodeId: number, servers: ServerMini[], included: string[], page: number) {
+function buildServersEmbed(ping: PingRow, nodeId: number, servers: ServerMini[], included: string[], page: number) {
     const totalPages = Math.max(1, Math.ceil(servers.length / PAGE_SIZE_SERVERS));
     const slice = servers.slice(page * PAGE_SIZE_SERVERS, page * PAGE_SIZE_SERVERS + PAGE_SIZE_SERVERS);
     const embed = new EmbedBuilder()
-        .setTitle(`Gestion des serveurs • ${pingName} • Node #${nodeId}`)
+        .setTitle(`Gestion des serveurs • ${ping.name} • Node #${nodeId}`)
         .setDescription(`Cliquez sur un bouton pour inclure / exclure un serveur du filtre. Page ${page+1}/${totalPages}`)
         .setTimestamp();
     if (slice.length === 0) {
@@ -51,7 +51,7 @@ function buildServersEmbed(pingName: string, nodeId: number, servers: ServerMini
     return embed;
 }
 
-function buildServerButtons(servers: ServerMini[], included: string[], pingName: string, guildId: string, nodeId: number, page: number) {
+function buildServerButtons(servers: ServerMini[], included: string[], ping: PingRow, guildId: string, nodeId: number, page: number) {
     const rows: ActionRowBuilder<ButtonBuilder>[] = [];
     const totalPages = Math.max(1, Math.ceil(servers.length / PAGE_SIZE_SERVERS));
     const slice = servers.slice(page * PAGE_SIZE_SERVERS, page * PAGE_SIZE_SERVERS + PAGE_SIZE_SERVERS).slice(0,25); // sécurité
@@ -60,7 +60,7 @@ function buildServerButtons(servers: ServerMini[], included: string[], pingName:
         const key = serverKey(server);
         const inside = included.includes(key);
         const btn = new ButtonBuilder()
-            .setCustomId(`ps|s|${guildId}|${pingName}|${nodeId}|${key}`)
+            .setCustomId(`ps|s|${guildId}|${ping.id}|${nodeId}|${key}`)
             .setLabel(server.name ? (server.name.length > 15 ? server.name.slice(0,12)+"…" : server.name) : key.slice(0,15))
             .setStyle(inside ? ButtonStyle.Primary : ButtonStyle.Secondary);
         current.push(btn);
@@ -69,9 +69,9 @@ function buildServerButtons(servers: ServerMini[], included: string[], pingName:
     if(current.length) rows.push(new ActionRowBuilder<ButtonBuilder>().addComponents(...current));
     if(totalPages > 1){
         const nav: ButtonBuilder[] = [];
-        nav.push(new ButtonBuilder().setCustomId(`ps|p|${guildId}|${pingName}|${nodeId}|${Math.max(0, page-1)}`).setLabel('◀').setStyle(ButtonStyle.Secondary).setDisabled(page===0));
+        nav.push(new ButtonBuilder().setCustomId(`ps|p|${guildId}|${ping.id}|${nodeId}|${Math.max(0, page-1)}`).setLabel('◀').setStyle(ButtonStyle.Secondary).setDisabled(page===0));
         nav.push(new ButtonBuilder().setCustomId('ps|noop').setLabel(`Page ${page+1}/${totalPages}`).setStyle(ButtonStyle.Secondary).setDisabled(true));
-        nav.push(new ButtonBuilder().setCustomId(`ps|p|${guildId}|${pingName}|${nodeId}|${Math.min(totalPages-1, page+1)}`).setLabel('▶').setStyle(ButtonStyle.Secondary).setDisabled(page===totalPages-1));
+        nav.push(new ButtonBuilder().setCustomId(`ps|p|${guildId}|${ping.id}|${nodeId}|${Math.min(totalPages-1, page+1)}`).setLabel('▶').setStyle(ButtonStyle.Secondary).setDisabled(page===totalPages-1));
         rows.push(new ActionRowBuilder<ButtonBuilder>().addComponents(...nav));
     }
     return rows.slice(0,5);
@@ -89,15 +89,15 @@ export default new Command({
         .setDescriptionLocalizations({
             fr: "Afficher et gérer les serveurs d'un node associé à un ping."
         })
-        .addStringOption(option=>
+        .addNumberOption(option =>
             option
-                .setName("name")
+                .setName("id")
                 .setNameLocalizations({
-                    fr: "nom"
+                    fr: "identifiant"
                 })
-                .setDescription("Ping's name")
+                .setDescription("Ping's id")
                 .setDescriptionLocalizations({
-                    fr: "Nom du ping"
+                    fr: "Identifiant du ping"
                 })
                 .setRequired(true)
                 .setAutocomplete(true)
@@ -119,9 +119,9 @@ export default new Command({
     async execute(interaction) {
         const guildId = interaction.guildId;
         if(!guildId){ await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
-        const name = interaction.options?.getString("name", true)?.toLowerCase() ?? "";
+        const id = interaction.options?.getNumber("id", true);
         const nodeId = interaction.options?.getInteger("nodeid", true)!;
-        const ping = await getPing(name, guildId);
+        const ping = await getPing(id, guildId);
         if(!ping){ await interaction.reply({content: "Ping introuvable.", flags: MessageFlags.Ephemeral}); return; }
 
         const node = await getNode(ping.base_url, ping.app_key, nodeId);
@@ -130,25 +130,36 @@ export default new Command({
         const servers = extractServers(node);
         const included = ping.servers_filter ? JSON.parse(ping.servers_filter) as string[] : [];
         const page = 0;
-        const embed = buildServersEmbed(name, nodeId, servers, included, page);
-        const components = buildServerButtons(servers, included, name, guildId, nodeId, page);
+        const embed = buildServersEmbed(ping, nodeId, servers, included, page);
+        const components = buildServerButtons(servers, included, ping, guildId, nodeId, page);
         await interaction.reply({ embeds:[embed], components, flags: MessageFlags.Ephemeral });
     },
 
     async autocomplete(interaction) {
         const focused = interaction.options.getFocused(true);
         const guildId = interaction.guildId;
-        if(!guildId){ await interaction.respond([]); return; }
-        if(focused.name === 'name') {
-            const value = focused.value.toLowerCase();
-            const pings = await listPings(guildId);
-            const filtered = pings.filter(p=>p.name.includes(value)).slice(0,25).map(p=>({name:p.name,value:p.name}));
-            await interaction.respond(filtered); return;
+        if(!guildId){
+            await interaction.respond([]);
+            return;
         }
+
+        if(focused.name === 'id') {
+            const pings = await listPings(guildId);
+            const filtered = pings
+                .filter(p=> p.id.toString().includes(focused.value))
+                .slice(0,25)
+                .map(p=>({ name:p.name,value:p.id }));
+            await interaction.respond(filtered);
+            return;
+        }
+
         if(focused.name === 'nodeid') {
-            const pingNameRaw = interaction.options.getString('name');
-            if(!pingNameRaw){ await interaction.respond([]); return; }
-            const ping = await getPing(pingNameRaw.toLowerCase(), guildId);
+            const id = interaction.options.getNumber('id', true);
+            if(!id){
+                await interaction.respond([]);
+                return;
+            }
+            const ping = await getPing(id, guildId);
             if(!ping){ await interaction.respond([]); return; }
             const cacheKey = `${guildId}:${ping.name}`;
             const now = Date.now();
@@ -173,40 +184,51 @@ export default new Command({
         if(parts[0] !== 'ps') return;
         if(parts[1] === 'noop'){ await interaction.deferUpdate(); return; }
         if(parts[1] === 'p') {
-            const [, , guildId, pingName, nodeIdRaw, pageRaw] = parts;
-            if(interaction.guildId !== guildId){ await interaction.reply({ content: "Contexte invalide.", flags: MessageFlags.Ephemeral  }); return; }
+            const [, , guildId, nameId, nodeIdRaw, pageRaw] = parts;
+            const id = Number(nameId);
+
+            if(interaction.guildId !== guildId){
+                await interaction.reply({ content: "Contexte invalide.", flags: MessageFlags.Ephemeral  });
+                return;
+            }
+
             const nodeId = Number(nodeIdRaw);
-            const ping = await getPing(pingName, guildId);
+            const ping = await getPing(id, guildId);
             if(!ping){ await interaction.reply({ content: "Ping introuvable.", flags: MessageFlags.Ephemeral  }); return; }
             const node = await getNode(ping.base_url, ping.app_key, nodeId);
             if(!node){ await interaction.reply({ content: "Node introuvable.", flags: MessageFlags.Ephemeral  }); return; }
             const servers = extractServers(node);
             const included = ping.servers_filter ? JSON.parse(ping.servers_filter) as string[] : [];
             const page = Number(pageRaw);
-            const embed = buildServersEmbed(pingName, nodeId, servers, included, page);
-            const components = buildServerButtons(servers, included, pingName, guildId, nodeId, page);
+            const embed = buildServersEmbed(ping, nodeId, servers, included, page);
+            const components = buildServerButtons(servers, included, ping, guildId, nodeId, page);
             try { await interaction.update({ embeds:[embed], components }); } catch { await interaction.reply({ embeds:[embed], components, flags: MessageFlags.Ephemeral  }); }
             return;
         }
         if(parts[1] === 's') {
-            const [, , guildId, pingName, nodeIdRaw, serverKeyToggle] = parts;
+            const [, , guildId, nameId, nodeIdRaw, serverKeyToggle] = parts;
+            const id = Number(nameId);
             if(interaction.guildId !== guildId){ await interaction.reply({ content: "Contexte invalide.", flags: MessageFlags.Ephemeral  }); return; }
             const nodeId = Number(nodeIdRaw);
-            const ping = await getPing(pingName, guildId);
+            const ping = await getPing(id, guildId);
             if(!ping){ await interaction.reply({ content: "Ping introuvable.", flags: MessageFlags.Ephemeral  }); return; }
             const node = await getNode(ping.base_url, ping.app_key, nodeId);
             if(!node){ await interaction.reply({ content: "Node introuvable.", flags: MessageFlags.Ephemeral  }); return; }
             const servers = extractServers(node);
             let current = ping.servers_filter ? JSON.parse(ping.servers_filter) as string[] : [];
             if(current.includes(serverKeyToggle)) current = current.filter(k=>k!==serverKeyToggle); else current.push(serverKeyToggle);
-            await updatePingServersFilter(pingName, current, guildId);
+            await updatePingServersFilter(ping.id, current, guildId);
             // Determine page from description
             const desc = interaction.message.embeds[0]?.description ?? '';
             const match = desc.match(/Page (\d+)\/(\d+)/i);
             const page = match ? Math.max(0, parseInt(match[1])-1) : 0;
-            const embed = buildServersEmbed(pingName, nodeId, servers, current, page);
-            const components = buildServerButtons(servers, current, pingName, guildId, nodeId, page);
-            try { await interaction.update({ embeds:[embed], components }); } catch { await interaction.reply({ embeds:[embed], components, flags: MessageFlags.Ephemeral  }); }
+            const embed = buildServersEmbed(ping, nodeId, servers, current, page);
+            const components = buildServerButtons(servers, current, ping, guildId, nodeId, page);
+            try {
+                await interaction.update({ embeds:[embed], components });
+            } catch {
+                await interaction.reply({ embeds:[embed], components, flags: MessageFlags.Ephemeral  });
+            }
             if(ping.channel_id){
                 await startPinger(interaction.client, ping.id, guildId);
                 await triggerPingUpdate(interaction.client, ping.id, guildId);
