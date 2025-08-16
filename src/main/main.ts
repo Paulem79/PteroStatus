@@ -9,6 +9,7 @@ import path from "node:path";
 import {fileURLToPath} from "node:url";
 
 import mysql from 'npm:mysql2';
+import {ensureTables} from "./sql/requests.ts";
 
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
@@ -47,6 +48,7 @@ connection.connect((err) => {
     console.error("Erreur de connexion à la base de données:", err);
   } else {
     console.log("Connecté à la base de données MySQL");
+    ensureTables().catch(e=>console.error("Erreur création tables", e));
   }
 });
 
@@ -55,8 +57,21 @@ export function setCommands(cmds: Command[]) {
 }
 
 export async function defaultButtons(
-  _interaction: ButtonInteraction<"cached">,
-) {}
+  interaction: ButtonInteraction<"cached">,
+) {
+    const parts = interaction.customId.split('|');
+    if(parts[0] == 'ps') {
+        const module = await import("./commands/shownservers.ts")
+        const command = module.default;
+        if (!command || !command.button) return;
+        command.button(interaction);
+    } else if(parts[0] == 'pn') {
+        const module = await import("./commands/shownnodes.ts")
+        const command = module.default;
+        if (!command || !command.button) return;
+        command.button(interaction);
+    }
+}
 
 (async () => {
   events = await getEvents(__dirname, "events", client);

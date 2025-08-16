@@ -6,16 +6,11 @@ interface HttpException {
   }>;
 }
 
-enum NodeType {
-  List = "list",
-  Node = "node",
-}
-
 export interface Nodes extends HttpException {
-  object: NodeType;
+  object: "node";
   data: [
     {
-      object: NodeType;
+      object: string;
       attributes: NodeAttributes
     },
   ];
@@ -39,7 +34,7 @@ export interface DetailedNodeAttributes {
     } | null;
     relationships: {
         allocations: { object: "list"; data: object[] };
-        servers: { object: "list"; data: object[] };
+        servers: { object: "list"; data: ServerResponse[] };
     };
 }
 
@@ -75,7 +70,7 @@ export interface SingleNodeAttributes extends NodeAttributes, DetailedNodeAttrib
 }
 
 export interface SingleNode extends HttpException {
-  object: NodeType.Node;
+  object: "node";
   attributes: SingleNodeAttributes
 }
 
@@ -135,10 +130,12 @@ export interface ServerResponse extends HttpException {
   };
 }
 
+export type ServerState = "offline" | "stopping" | "running" | "starting";
+
 export interface ServerResources extends HttpException {
   object: "stats";
   attributes: {
-    current_state: "offline" | "stopping" | "running" | "starting";
+    current_state: ServerState;
     is_suspended: boolean;
     resources: {
       memory_bytes: number;

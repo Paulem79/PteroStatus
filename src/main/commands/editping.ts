@@ -1,0 +1,101 @@
+import {Command} from "../handlers/commands.ts";
+import {
+    ChannelType,
+    InteractionContextType,
+    MessageFlags,
+    PermissionsBitField,
+    SlashCommandBuilder
+} from "../../deps.ts";
+import {getPing, listPings, setPingChannel, updatePingCredentials} from "../sql/requests.ts";
+import {MessageBuilder} from "../../api/builder.ts";
+import {getNodes} from "../../api/pterodactyl.ts";
+import {startPinger} from "../pinger.ts";
+
+export default new Command({
+    data: new SlashCommandBuilder()
+        .setContexts(InteractionContextType.Guild)
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
+        .setName("editping")
+        .setDescription("Modifier les clés ou le salon d'un ping")
+        .addStringOption(o=>o.setName("nom").setDescription("Nom du ping").setRequired(true).setAutocomplete(true))
+        .addStringOption(o=>o.setName("appkey").setDescription("Nouvelle App Key (Application)").setRequired(false))
+        .addStringOption(o=>o.setName("clientkey").setDescription("Nouvelle Client Key (Utilisateur)").setRequired(false))
+        .addChannelOption(o=>o.setName("salon").setDescription("Nouveau salon").addChannelTypes(ChannelType.GuildText).setRequired(false)),
+
+    async execute(interaction) {
+        const guildId = interaction.guildId;
+        if(!guildId){ await interaction.reply({content:"Commande à utiliser dans un serveur.", flags: MessageFlags.Ephemeral}); return; }
+        const name = interaction.options?.getString("nom", true)?.toLowerCase() ?? "";
+        const newAppKey = interaction.options?.getString("appkey")?.trim();
+        const newClientKey = interaction.options?.getString("clientkey")?.trim();
+        const newChannel = interaction.options?.getChannel("salon") ?? null;
+
+        if(!newAppKey && !newClientKey && !newChannel){
+            await interaction.reply({content:"Aucun changement fourni.", flags: MessageFlags.Ephemeral});
+            return;
+        }
+
+        const ping = await getPing(name, guildId);
+        if(!ping){
+            await interaction.reply({content:"Ping introuvable.", flags: MessageFlags.Ephemeral});
+            return;
+        }
+
+        // Vérifier nouvelle app key si fournie
+        if(newAppKey){
+            const nodes = await getNodes(ping.base_url, newAppKey);
+            if(!nodes){
+                await interaction.reply({content:"Nouvelle App Key invalide (échec accès nodes).", flags: MessageFlags.Ephemeral});
+                return;
+            }
+        }
+
+        // Appliquer mises à jour
+        const lines = new MessageBuilder();
+        if(newAppKey || newClientKey){
+            const ok = await updatePingCredentials(name, guildId, newAppKey, newClientKey);
+            if(!ok){
+                await interaction.reply({content:"Échec mise à jour des clés.", flags: MessageFlags.Ephemeral});
+                return;
+            }
+            if(newAppKey) lines.line("🔑 App Key mise à jour");
+            if(newClientKey) lines.line("🗝️ Client Key mise à jour");
+        }
+        if(newChannel){
+            const ok2 = await setPingChannel(name, newChannel.id, guildId);
+            if(!ok2){
+                await interaction.reply({content:"Échec mise à jour du salon.", flags: MessageFlags.Ephemeral});
+                return;
+            }
+            lines.line(`💬 Salon → <#${newChannel.id}>`);
+        }
+
+        // Redémarrer pinger si quelque chose change et qu'un channel est défini (après potentielle MAJ)
+        if((newAppKey || newClientKey || newChannel) && (newChannel?.id || ping.channel_id)){
+            await startPinger(interaction.client, name, guildId);
+        }
+
+        const mb = new MessageBuilder()
+            .line(`✏️ Modifications pour **${name}**:`);
+        if(lines.length() === 0)
+            mb.line("(Aucun changement appliqué)");
+        else
+            for(const l of lines.getLines()) mb.line(l);
+
+        await mb.reply(interaction, MessageFlags.Ephemeral);
+    },
+
+    async autocomplete(interaction) {
+        const guildId = interaction.guildId;
+        if(!guildId){ await interaction.respond([]); return; }
+        const focused = interaction.options.getFocused(true);
+        if(focused.name !== 'nom') return;
+        const value = focused.value.toLowerCase();
+        const pings = await listPings(guildId);
+        const filtered = pings
+            .filter(p=> p.name.toLowerCase().includes(value))
+            .slice(0,25)
+            .map(p=>({ name: p.name, value: p.name }));
+        await interaction.respond(filtered);
+    }
+});

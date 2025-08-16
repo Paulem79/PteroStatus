@@ -102,8 +102,6 @@ export async function getResources(
         );
         const data = (await response.json()) as ServerResources;
 
-        console.log(data);
-
         if (data?.errors) return undefined;
 
         return data;
