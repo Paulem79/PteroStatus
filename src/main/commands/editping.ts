@@ -51,15 +51,15 @@ export default new Command({
         }
 
         // Appliquer mises à jour
-        const lines = new MessageBuilder();
+        const messageBuilder = new MessageBuilder();
         if(newAppKey || newClientKey){
             const ok = await updatePingCredentials(name, guildId, newAppKey, newClientKey);
             if(!ok){
                 await interaction.reply({content:"Échec mise à jour des clés.", flags: MessageFlags.Ephemeral});
                 return;
             }
-            if(newAppKey) lines.line("🔑 App Key mise à jour");
-            if(newClientKey) lines.line("🗝️ Client Key mise à jour");
+            if(newAppKey) messageBuilder.line("🔑 App Key mise à jour");
+            if(newClientKey) messageBuilder.line("🗝️ Client Key mise à jour");
         }
         if(newChannel){
             const ok2 = await setPingChannel(name, newChannel.id, guildId);
@@ -67,7 +67,7 @@ export default new Command({
                 await interaction.reply({content:"Échec mise à jour du salon.", flags: MessageFlags.Ephemeral});
                 return;
             }
-            lines.line(`💬 Salon → <#${newChannel.id}>`);
+            messageBuilder.line(`💬 Salon → <#${newChannel.id}>`);
         }
 
         // Redémarrer pinger si quelque chose change et qu'un channel est défini (après potentielle MAJ)
@@ -77,10 +77,10 @@ export default new Command({
 
         const mb = new MessageBuilder()
             .line(`✏️ Modifications pour **${name}**:`);
-        if(lines.length() === 0)
+        if(messageBuilder.length() === 0)
             mb.line("(Aucun changement appliqué)");
         else
-            for(const l of lines.getLines()) mb.line(l);
+            for(const l of messageBuilder.getLines()) mb.line(l);
 
         await mb.reply(interaction, MessageFlags.Ephemeral);
     },

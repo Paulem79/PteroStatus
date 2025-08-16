@@ -71,8 +71,6 @@ export async function getServer(
         );
         const data = (await response.json()) as ServerResponse;
 
-        console.log(data);
-
         if (data?.errors) return undefined;
 
         return data;

@@ -128,7 +128,11 @@ export async function decryptFromStorage(stored: string | null): Promise<{ plain
             let decrypted: ArrayBuffer | null = null;
             let usedSecondary = false;
             for(const k of tryKeys){
-                try { decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, k, ct); if(k === secondary) usedSecondary = true; break; } catch { /* next */ }
+                try {
+                    decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, k, ct);
+                    if(k === secondary) usedSecondary = true;
+                    break;
+                } catch { /* next */ }
             }
             if(!decrypted) return { plain: "(erreur dechiffrement)" };
             const plain = new TextDecoder().decode(decrypted);

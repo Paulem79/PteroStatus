@@ -32,9 +32,14 @@ jobs:
           echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
           echo USER_APIKEY=${{ secrets.USER_APIKEY }} >> .env
           echo PTE_PANEL_ID=${{ secrets.PTE_PANEL_ID }} >> .env
+          echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+          echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+          echo DB_NAME=${{ secrets.DB_NAME }} >> .env
+          echo DB_USER=${{ secrets.DB_USER }} >> .env
+          echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
 
       - name: Run tests
-        run: deno test --allow-read --allow-env --env-file --allow-net src/test/test_panel.ts
+        run: deno test --allow-all --env-file src/test/test.ts
 
   deploy:
     name: 🚀 Deploy & Restart
