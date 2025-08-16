@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 import {Command} from "../handlers/commands.ts";
 import {
     ChannelType,

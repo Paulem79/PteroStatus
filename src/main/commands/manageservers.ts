@@ -81,9 +81,9 @@ export default new Command({
     data: new SlashCommandBuilder()
         .setContexts(InteractionContextType.Guild)
         .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
-        .setName("shownservers")
+        .setName("manageservers")
         .setNameLocalizations({
-            fr: "montrerserveurs"
+            fr: "gererserveurs"
         })
         .setDescription("Show and manage servers of a node associated to a ping.")
         .setDescriptionLocalizations({
@@ -174,28 +174,28 @@ export default new Command({
         if(parts[1] === 'noop'){ await interaction.deferUpdate(); return; }
         if(parts[1] === 'p') {
             const [, , guildId, pingName, nodeIdRaw, pageRaw] = parts;
-            if(interaction.guildId !== guildId){ await interaction.reply({ content: "Contexte invalide.", ephemeral:true }); return; }
+            if(interaction.guildId !== guildId){ await interaction.reply({ content: "Contexte invalide.", flags: MessageFlags.Ephemeral  }); return; }
             const nodeId = Number(nodeIdRaw);
             const ping = await getPing(pingName, guildId);
-            if(!ping){ await interaction.reply({ content: "Ping introuvable.", ephemeral:true }); return; }
+            if(!ping){ await interaction.reply({ content: "Ping introuvable.", flags: MessageFlags.Ephemeral  }); return; }
             const node = await getNode(ping.base_url, ping.app_key, nodeId);
-            if(!node){ await interaction.reply({ content: "Node introuvable.", ephemeral:true }); return; }
+            if(!node){ await interaction.reply({ content: "Node introuvable.", flags: MessageFlags.Ephemeral  }); return; }
             const servers = extractServers(node);
             const included = ping.servers_filter ? JSON.parse(ping.servers_filter) as string[] : [];
             const page = Number(pageRaw);
             const embed = buildServersEmbed(pingName, nodeId, servers, included, page);
             const components = buildServerButtons(servers, included, pingName, guildId, nodeId, page);
-            try { await interaction.update({ embeds:[embed], components }); } catch { await interaction.reply({ embeds:[embed], components, ephemeral:true }); }
+            try { await interaction.update({ embeds:[embed], components }); } catch { await interaction.reply({ embeds:[embed], components, flags: MessageFlags.Ephemeral  }); }
             return;
         }
         if(parts[1] === 's') {
             const [, , guildId, pingName, nodeIdRaw, serverKeyToggle] = parts;
-            if(interaction.guildId !== guildId){ await interaction.reply({ content: "Contexte invalide.", ephemeral:true }); return; }
+            if(interaction.guildId !== guildId){ await interaction.reply({ content: "Contexte invalide.", flags: MessageFlags.Ephemeral  }); return; }
             const nodeId = Number(nodeIdRaw);
             const ping = await getPing(pingName, guildId);
-            if(!ping){ await interaction.reply({ content: "Ping introuvable.", ephemeral:true }); return; }
+            if(!ping){ await interaction.reply({ content: "Ping introuvable.", flags: MessageFlags.Ephemeral  }); return; }
             const node = await getNode(ping.base_url, ping.app_key, nodeId);
-            if(!node){ await interaction.reply({ content: "Node introuvable.", ephemeral:true }); return; }
+            if(!node){ await interaction.reply({ content: "Node introuvable.", flags: MessageFlags.Ephemeral  }); return; }
             const servers = extractServers(node);
             let current = ping.servers_filter ? JSON.parse(ping.servers_filter) as string[] : [];
             if(current.includes(serverKeyToggle)) current = current.filter(k=>k!==serverKeyToggle); else current.push(serverKeyToggle);
@@ -206,8 +206,11 @@ export default new Command({
             const page = match ? Math.max(0, parseInt(match[1])-1) : 0;
             const embed = buildServersEmbed(pingName, nodeId, servers, current, page);
             const components = buildServerButtons(servers, current, pingName, guildId, nodeId, page);
-            try { await interaction.update({ embeds:[embed], components }); } catch { await interaction.reply({ embeds:[embed], components, ephemeral:true }); }
-            if(ping.channel_id){ await startPinger(interaction.client, pingName, guildId); await triggerPingUpdate(interaction.client, pingName, guildId); }
+            try { await interaction.update({ embeds:[embed], components }); } catch { await interaction.reply({ embeds:[embed], components, flags: MessageFlags.Ephemeral  }); }
+            if(ping.channel_id){
+                await startPinger(interaction.client, ping.id, guildId);
+                await triggerPingUpdate(interaction.client, ping.id, guildId);
+            }
             return;
         }
     }

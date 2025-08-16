@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 import {Collection, Events} from "../../deps.ts";
 
 import {HandledEvent} from "../handlers/events.ts";

@@ -91,21 +91,21 @@ export async function setPingChannel(name: string, channelId: string, guildId?: 
     return true;
 }
 
-export async function setPingMessageId(name: string, messageId: string, guildId?: string) {
-    const ping = await getPing(name, guildId);
-    if(!ping) return false;
-    await query(`UPDATE pings SET message_id = ? WHERE id = ?`, [messageId, ping.id]);
+export async function setPingMessageId(id: number, messageId: string) {
+    await query(`UPDATE pings SET message_id = ? WHERE id = ?`, [messageId, id]);
     return true;
 }
 
 export async function updatePingNodesFilter(name: string, nodeIds: number[], guildId?: string) {
-    const ping = await getPing(name, guildId); if(!ping) return false;
+    const ping = await getPing(name, guildId);
+    if(!ping) return false;
     await query(`UPDATE pings SET nodes_filter = ? WHERE id = ?`, [JSON.stringify(nodeIds), ping.id]);
     return true;
 }
 
 export async function updatePingServersFilter(name: string, serverIds: string[], guildId?: string) {
-    const ping = await getPing(name, guildId); if(!ping) return false;
+    const ping = await getPing(name, guildId);
+    if(!ping) return false;
     await query(`UPDATE pings SET servers_filter = ? WHERE id = ?`, [JSON.stringify(serverIds), ping.id]);
     return true;
 }

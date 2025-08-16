@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 import {Command} from "../handlers/commands.ts";
 import {InteractionContextType, MessageFlags, PermissionsBitField, SlashCommandBuilder} from "../../deps.ts";
 import {createPing, getPing} from "../sql/requests.ts";

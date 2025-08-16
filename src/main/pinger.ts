@@ -7,20 +7,20 @@ import {MessageBuilder} from "../api/builder.ts";
 
 interface RunningPing { interval: number; }
 
-const running: Map<string, RunningPing> = new Map(); // key = guildId:name
+const running: Map<string, RunningPing> = new Map(); // key = guildId:id
 
 export async function startAllPingers(client: Client<true>) {
     const pings = await getAllPings();
     for (const p of pings) {
-        if (p.channel_id) await startPinger(client, p.name, p.guild_id || undefined);
+        if (p.channel_id) await startPinger(client, p.id, p.guild_id || undefined);
     }
 }
 
-export async function startPinger(client: Client<true>, name: string, guildId?: string) {
-    const key = `${guildId || 'global'}:${name}`;
-    stopPinger(name, guildId);
+export async function startPinger(client: Client<true>, id: number, guildId?: string) {
+    const key = `${guildId || 'global'}:${id}`;
+    stopPinger(id, guildId);
     const pings = await getAllPings();
-    const ping = pings.find(p=>p.name===name && (guildId ? p.guild_id === guildId : true));
+    const ping = pings.find(p=>p.id===id && (guildId ? p.guild_id === guildId : true));
     if(!ping || !ping.channel_id) return;
     const channel = client.channels.cache.get(ping.channel_id!);
     if(!channel || !channel.isTextBased() || !channel.isSendable()) return;
@@ -31,20 +31,20 @@ export async function startPinger(client: Client<true>, name: string, guildId?: 
     } catch { /* message supprimé */ }
 
     if(!messageId) {
-        const sent = await channel.send({ content: `Initialisation du statut (${name})...` });
+        const sent = await channel.send({ content: `Initialisation du statut (${ping.name})...` });
         messageId = sent.id;
-        await setPingMessageId(name, messageId, guildId);
+        await setPingMessageId(ping.id, messageId);
     }
 
     try {
-        messageId = await updatePingMessage(ping.name, client, messageId!, guildId);
+        messageId = await updatePingMessage(id, client, messageId!, guildId);
     } catch(e) {
         console.error(e);
     }
 
     const interval = setInterval(async ()=>{
         try {
-            messageId = await updatePingMessage(ping.name, client, messageId!, guildId);
+            messageId = await updatePingMessage(id, client, messageId!, guildId);
         } catch(e) {
             console.error("Update ping erreur", e);
         }
@@ -52,8 +52,8 @@ export async function startPinger(client: Client<true>, name: string, guildId?: 
     running.set(key, { interval: interval as unknown as number });
 }
 
-export function stopPinger(name: string, guildId?: string) {
-    const key = `${guildId || 'global'}:${name}`;
+export function stopPinger(id: number, guildId?: string) {
+    const key = `${guildId || 'global'}:${id}`;
     const r = running.get(key);
 
     if(r) {
@@ -62,17 +62,17 @@ export function stopPinger(name: string, guildId?: string) {
     }
 }
 
-export async function triggerPingUpdate(client: Client<true>, name: string, guildId?: string) {
+export async function triggerPingUpdate(client: Client<true>, id: number, guildId?: string) {
     const pings = await getAllPings();
-    const ping = pings.find(p=>p.name===name && (guildId ? p.guild_id === guildId : true));
+    const ping = pings.find(p=>p.id===id && (guildId ? p.guild_id === guildId : true));
     if(!ping || !ping.message_id) return;
-    await updatePingMessage(name, client, ping.message_id, guildId);
+    await updatePingMessage(id, client, ping.message_id, guildId);
 }
 
-async function updatePingMessage(name: string, client: Client<true>, messageId: string, guildId?: string): Promise<string> {
+async function updatePingMessage(id: number, client: Client<true>, messageId: string, guildId?: string): Promise<string> {
     const pings = await getAllPings();
 
-    const ping = pings.find(p=>p.name===name && (guildId ? p.guild_id === guildId : true));
+    const ping = pings.find(p=>p.id===id && (guildId ? p.guild_id === guildId : true));
     if(!ping || !ping.channel_id) return messageId;
 
     const channel = client.channels.cache.get(ping.channel_id);
@@ -82,14 +82,14 @@ async function updatePingMessage(name: string, client: Client<true>, messageId: 
     try {
         message = await channel.messages.fetch(messageId);
     } catch {
-        const sent = await channel.send({ content: `Recréation du statut (${name})...` });
-        await setPingMessageId(name, sent.id, guildId);
+        const sent = await channel.send({ content: `Recréation du statut (${ping.name})...` });
+        await setPingMessageId(id, sent.id);
         message = sent;
         messageId = sent.id; // mise à jour pour les prochains cycles
     }
 
     const embed = new EmbedBuilder()
-        .setTitle(`Statut ${name}`)
+        .setTitle(`Statut ${ping.name}`)
         .setColor(Colors.Blurple)
         .setTimestamp();
 
@@ -107,7 +107,7 @@ async function updatePingMessage(name: string, client: Client<true>, messageId: 
         try {
             nodeIdsFilter = JSON.parse(ping.nodes_filter);
         } catch {
-            console.error("Erreur de parsing des IDs de nodes pour le ping", name, ping.nodes_filter);
+            console.error("Erreur de parsing des IDs de nodes pour le ping", id, ping.nodes_filter);
 
             embed.setDescription("Erreur de parsing des IDs de nodes.");
             embed.setColor(Colors.Red);

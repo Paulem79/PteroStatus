@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 import {ActivityType, Events} from "../../deps.ts";
 
 import {HandledEvent} from "../handlers/events.ts";

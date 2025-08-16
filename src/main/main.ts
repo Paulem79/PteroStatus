@@ -42,12 +42,12 @@ export async function defaultButtons(
 ) {
     const parts = interaction.customId.split('|');
     if(parts[0] == 'ps') {
-        const module = await import("./commands/shownservers.ts")
+        const module = await import("./commands/manageservers.ts")
         const command = module.default;
         if (!command || !command.button) return;
         command.button(interaction);
     } else if(parts[0] == 'pn') {
-        const module = await import("./commands/shownnodes.ts")
+        const module = await import("./commands/managenodes.ts")
         const command = module.default;
         if (!command || !command.button) return;
         command.button(interaction);
@@ -82,4 +82,5 @@ export async function defaultButtons(
   console.error(err);
 });
 
+// noinspection JSIgnoredPromiseFromCall
 client.login(Deno.env.get("TOKEN"));

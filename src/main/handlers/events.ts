@@ -13,7 +13,6 @@ export interface HandledEvent<Event extends keyof ClientEvents> {
  * @param dir The directory
  * @param eventPath The path to the command directory (from the file where you use the function)
  * @param client (optional) if you want to register commands from the function
- * @param broadcast Broadcast commands registering
  * @returns The commands
  */
 export async function getEvents(
@@ -59,6 +58,7 @@ export async function getEvents(
  * @param events
  * @param commandFiles
  * @param foldersPath
+ * @param client
  */
 async function Register(
   events: string[],
