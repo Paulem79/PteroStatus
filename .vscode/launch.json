@@ -1,20 +1,20 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "request": "launch",
-            "name": "Launch Program",
-            "type": "node",
-            "program": "${workspaceFolder}/src/main/main.ts",
-            "cwd": "${workspaceFolder}",
-            "env": {},
-            "runtimeExecutable": "deno",
-            "runtimeArgs": [
-                "run",
-                "--allow-all"
-            ],
-            "attachSimplePort": 9229,
-            "console": "externalTerminal"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "request": "launch",
+      "name": "Launch Program",
+      "type": "node",
+      "program": "${workspaceFolder}/src/main/main.ts",
+      "cwd": "${workspaceFolder}",
+      "env": {},
+      "runtimeExecutable": "deno",
+      "runtimeArgs": [
+        "run",
+        "--allow-all"
+      ],
+      "attachSimplePort": 9229,
+      "console": "externalTerminal"
+    }
+  ]
 }

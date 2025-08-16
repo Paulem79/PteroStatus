@@ -1,4 +1,4 @@
-import { Client, ClientEvents } from "../../deps.ts";
+import {Client, ClientEvents} from "../../deps.ts";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -19,7 +19,7 @@ export interface HandledEvent<Event extends keyof ClientEvents> {
 export async function getEvents(
   dir: string,
   eventPath: string,
-  client: Client
+  client: Client,
 ) {
   const events: string[] = [];
   const foldersPath = path.join(dir, eventPath);
@@ -48,7 +48,7 @@ export async function getEvents(
 
   console.log(
     `%c(/) Registered ${events.length} events ! (${eventsLogger})`,
-    "color: #22bb33"
+    "color: #22bb33",
   );
 
   return events;
@@ -64,7 +64,7 @@ async function Register(
   events: string[],
   commandFiles: string[],
   foldersPath: string,
-  client: Client
+  client: Client,
 ) {
   for (const file of commandFiles) {
     const filePath = path.join(foldersPath, file);

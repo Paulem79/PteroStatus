@@ -1,13 +1,13 @@
 import {
-  AnySelectMenuInteraction,
-  AutocompleteInteraction,
-  ButtonInteraction,
-  ChatInputCommandInteraction,
-  Client,
-  ModalSubmitInteraction,
-  ApplicationCommandDataResolvable,
+    AnySelectMenuInteraction,
+    ApplicationCommandDataResolvable,
+    AutocompleteInteraction,
+    ButtonInteraction,
+    ChatInputCommandInteraction,
+    Client,
+    ModalSubmitInteraction,
+    SlashCommandOptionsOnlyBuilder,
 } from "../../deps.ts";
-import { SlashCommandOptionsOnlyBuilder } from "../../deps.ts";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -15,16 +15,16 @@ export class Command {
   data!: SlashCommandOptionsOnlyBuilder;
   interaction?: ChatInputCommandInteraction<"cached">;
   execute!: (
-    interaction: ChatInputCommandInteraction<"cached">
+    interaction: ChatInputCommandInteraction<"cached">,
   ) => Promise<void> | void;
   autocomplete?: (
-    interaction: AutocompleteInteraction<"cached">
+    interaction: AutocompleteInteraction<"cached">,
   ) => Promise<void> | void;
   selectmenu?: (
-    interaction: AnySelectMenuInteraction<"cached">
+    interaction: AnySelectMenuInteraction<"cached">,
   ) => Promise<void> | void;
   modal?: (
-    interaction: ModalSubmitInteraction<"cached">
+    interaction: ModalSubmitInteraction<"cached">,
   ) => Promise<void> | void;
   button?: (interaction: ButtonInteraction<"cached">) => Promise<void> | void;
   attributes?: Attributes;
@@ -32,16 +32,16 @@ export class Command {
   constructor(options?: {
     data: SlashCommandOptionsOnlyBuilder;
     execute: (
-      interaction: ChatInputCommandInteraction<"cached">
+      interaction: ChatInputCommandInteraction<"cached">,
     ) => Promise<void> | void;
     autocomplete?: (
-      interaction: AutocompleteInteraction<"cached">
+      interaction: AutocompleteInteraction<"cached">,
     ) => Promise<void> | void;
     selectmenu?: (
-      interaction: AnySelectMenuInteraction<"cached">
+      interaction: AnySelectMenuInteraction<"cached">,
     ) => Promise<void> | void;
     modal?: (
-      interaction: ModalSubmitInteraction<"cached">
+      interaction: ModalSubmitInteraction<"cached">,
     ) => Promise<void> | void;
     button?: (interaction: ButtonInteraction<"cached">) => Promise<void> | void;
     attributes?: Attributes;
@@ -71,7 +71,7 @@ export interface Attributes {
 export async function getCommands(
   dir: string,
   commandPath: string,
-  client: Client<true>
+  client: Client<true>,
 ) {
   const cmd: Command[] = [];
   const foldersPath = path.join(dir, commandPath);
@@ -100,18 +100,16 @@ export async function getCommands(
 
   console.log(
     `%c(/) Registering ${cmd.length} commands... (${commandsLogger})`,
-    "color: #ff9900"
+    "color: #ff9900",
   );
 
   await client.application.commands.set(
-    cmd.map((c) => c.data.toJSON()) as ApplicationCommandDataResolvable[]
+    cmd.map((c) => c.data.toJSON()) as ApplicationCommandDataResolvable[],
   );
 
   console.log(
-    `%c(/) Registered ${
-      client.application.commands.cache.size
-    } commands !`,
-    "color: #22bb33"
+    `%c(/) Registered ${client.application.commands.cache.size} commands !`,
+    "color: #22bb33",
   );
 
   return cmd;
@@ -126,7 +124,7 @@ export async function getCommands(
 async function Register(
   cmd: Command[],
   commandFiles: string[],
-  foldersPath: string
+  foldersPath: string,
 ) {
   for (const file of commandFiles) {
     const filePath = path.join(foldersPath, file);

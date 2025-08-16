@@ -1,2 +1,3 @@
 # PteroStatus
- Get informations of your pterodactyl/pelican panel directly on Discord
+
+Get informations of your pterodactyl/pelican panel directly on Discord

@@ -1,8 +1,8 @@
-import { Events } from "../../deps.ts";
+import {ActivityType, Events} from "../../deps.ts";
 
-import { HandledEvent } from "../handlers/events.ts";
-import { __dirname, setCommands } from "../main.ts";
-import { getCommands } from "../handlers/commands.ts";
+import {HandledEvent} from "../handlers/events.ts";
+import {__dirname, setCommands} from "../main.ts";
+import {getCommands} from "../handlers/commands.ts";
 
 export default {
   once: true,
@@ -10,11 +10,9 @@ export default {
   async listener(client) {
     setCommands(await getCommands(__dirname, "commands", client));
 
-    setInterval(() => {
-      client.user.setActivity(`${client.guilds.cache.size} serveur(s)`, {
-        type: 2,
-      });
-    }, 10000);
+    client.user.setActivity(`${client.guilds.cache.size} serveur(s)`, {
+      type: ActivityType.Listening,
+    });
 
     console.log(`Prêt! Connecté en tant que ${client.user.tag}`);
   },

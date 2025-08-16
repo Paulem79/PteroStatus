@@ -1,17 +1,13 @@
-import {
-  ButtonInteraction,
-  Client,
-  Collection,
-  IntentsBitField,
-} from "../deps.ts";
+import {ButtonInteraction, Client, Collection, IntentsBitField,} from "../deps.ts";
 
-import { getEvents } from "./handlers/events.ts";
+import {getEvents} from "./handlers/events.ts";
 
-import config from "../../config.json" with { type: "json" };
-import { Command } from "./handlers/commands.ts";
+import config from "../../config.json" with {type: "json"};
+import {Command} from "./handlers/commands.ts";
 
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import {fileURLToPath} from "node:url";
+
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
 
@@ -26,14 +22,15 @@ export const client = new Client({
 
 export let commands: Command[] = [];
 export let events: string[] = [];
-export const cooldowns: Collection<string, Collection<string, number>> = new Collection();
+export const cooldowns: Collection<string, Collection<string, number>> =
+  new Collection();
 
 export function setCommands(cmds: Command[]) {
   commands = cmds;
 }
 
 export async function defaultButtons(
-  _interaction: ButtonInteraction<"cached">
+  _interaction: ButtonInteraction<"cached">,
 ) {}
 
 (async () => {
