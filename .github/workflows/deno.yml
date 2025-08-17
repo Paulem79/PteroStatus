@@ -8,8 +8,8 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: "🧪 Test"
+  test-panel:
+    name: 🧪 Test Panel
     runs-on: ubuntu-latest
     permissions: write-all
 
@@ -21,15 +21,6 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-
-      - name: Cache Deno modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/deno
-          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock','deno.json','deno.jsonc') }}
-          restore-keys: |
-            deno-${{ runner.os }}-
 
       - name: Run linter
         run: deno lint
@@ -51,11 +42,11 @@ jobs:
         run: deno test --allow-all --env-file src/test/test.ts
 
   delete:
-    name: "🗑️ Delete old files"
+    name: 🗑️ Delete old files
     runs-on: ubuntu-latest
     permissions: write-all
     if: ${{ github.ref == 'refs/heads/main' }}
-    needs: test
+    needs: test-panel
 
     steps:
       - name: Setup repo
@@ -65,15 +56,6 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
-
-      - name: Cache Deno modules (restore only)
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/deno
-          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock','deno.json','deno.jsonc') }}
-          restore-keys: |
-            deno-${{ runner.os }}-
 
       - name: Create env file
         run: |
@@ -86,12 +68,11 @@ jobs:
         run: deno run --allow-all --env-file scripts/delete_dir.ts --root=./ --files=src
 
   deploy:
-    name: "🚀 Deploy & Restart"
+    name: 🚀 Deploy & Restart
     permissions: write-all
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
     needs: [delete]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v5
