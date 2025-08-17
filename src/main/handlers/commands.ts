@@ -7,12 +7,13 @@ import {
   Client,
   ModalSubmitInteraction,
   SlashCommandOptionsOnlyBuilder,
+    SlashCommandSubcommandsOnlyBuilder
 } from "../../deps.ts";
 import path from "node:path";
 import fs from "node:fs";
 
 export class Command {
-  data!: SlashCommandOptionsOnlyBuilder;
+  data!: SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
   interaction?: ChatInputCommandInteraction<"cached">;
   execute!: (
     interaction: ChatInputCommandInteraction<"cached">,
@@ -30,7 +31,7 @@ export class Command {
   attributes?: Attributes;
 
   constructor(options?: {
-    data: SlashCommandOptionsOnlyBuilder;
+    data: SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder;
     execute: (
       interaction: ChatInputCommandInteraction<"cached">,
     ) => Promise<void> | void;
@@ -130,8 +131,10 @@ async function Register(
     const filePath = path.join(foldersPath, file);
     const fileURL = `file:///${filePath}`;
     const module = await import(fileURL);
-    const command = module.default;
-    cmd.push(command);
+    const command = module.default as Command | undefined;
+    if (command && command.data) {
+      cmd.push(command);
+    }
   }
 }
 

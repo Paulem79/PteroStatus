@@ -45,17 +45,15 @@ export function setCommands(cmds: Command[]) {
 export async function defaultButtons(
   interaction: ButtonInteraction<"cached">,
 ) {
-  const parts = interaction.customId.split("|");
-  if (parts[0] == "ps") {
-    const module = await import("./commands/manageservers.ts");
-    const command = module.default;
-    if (!command || !command.button) return;
-    command.button(interaction);
-  } else if (parts[0] == "pn") {
-    const module = await import("./commands/managenodes.ts");
-    const command = module.default;
-    if (!command || !command.button) return;
-    command.button(interaction);
+  const id = interaction.customId;
+  if (id.startsWith("ps") || id.startsWith("pn")) {
+    try {
+      const module = await import("./commands/ping.ts");
+      const command = module.default as Command;
+      if (command?.button) await command.button(interaction);
+    } catch (e) {
+      console.error("Erreur gestion bouton ping", e);
+    }
   }
 }
 
