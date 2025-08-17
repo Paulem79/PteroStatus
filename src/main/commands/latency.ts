@@ -1,17 +1,17 @@
 import { MessageFlags, SlashCommandBuilder } from "../../deps.ts";
 import { Command } from "../handlers/commands.ts";
 import { MessageBuilder } from "../../api/builder.ts";
-import { PingSystem } from "../../api/network.ts";
+import { LatencySystem } from "../../api/network.ts";
 
 export default new Command({
   data: new SlashCommandBuilder()
-    .setName("ping")
+    .setName("latency")
     .setNameLocalizations({
       fr: "latence",
     })
-    .setDescription("Get the bot's ping.")
+    .setDescription("Get the bot's latency.")
     .setDescriptionLocalizations({
-      fr: "Obtenir le ping du bot.",
+      fr: "Obtenir la latence du bot.",
     })
     .addBooleanOption((option) =>
       option
@@ -26,13 +26,13 @@ export default new Command({
     ),
 
   async execute(interaction) {
-    const ping = new PingSystem(interaction);
+    const ping = new LatencySystem(interaction);
     const total = ping.total();
     const host = ping.host();
     const api = ping.api();
 
     const message = new MessageBuilder()
-      .line(`:ping_pong: Pong ! Latence totale: **${total}ms**`)
+      .line(`:ping_pong: Latence totale: **${total}ms**`)
       .line(`Interne: **${host}ms** | API: **${api}ms**`);
 
     const isPublic = interaction.options?.getBoolean?.("public") === true;
