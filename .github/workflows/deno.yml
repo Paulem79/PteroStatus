@@ -41,6 +41,30 @@ jobs:
       - name: Run tests
         run: deno test --allow-all --env-file src/test/test.ts
 
+  delete:
+    name: 🗑️ Delete old files
+    runs-on: ubuntu-latest
+    permissions: write-all
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v5
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Create env file
+        run: |
+          touch .env
+          echo HOSTNAME=${{ secrets.HOSTNAME }} >> .env
+          echo USER_APIKEY=${{ secrets.USER_APIKEY }} >> .env
+          echo PTE_PANEL_ID=${{ secrets.PTE_PANEL_ID }} >> .env
+
+      - name: Delete old files
+        run: deno run --allow-all --env-file scripts/delete_dir.ts --root=./ --files=src
+
   deploy:
     name: 🚀 Deploy & Restart
     permissions: write-all
