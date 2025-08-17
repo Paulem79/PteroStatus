@@ -26,10 +26,10 @@ export default new Command({
     ),
 
   async execute(interaction) {
-    const ping = new LatencySystem(interaction);
-    const total = ping.total();
-    const host = ping.host();
-    const api = ping.api();
+    const latency = new LatencySystem(interaction);
+    const total = latency.total();
+    const host = latency.host();
+    const api = latency.api();
 
     const message = new MessageBuilder()
       .line(`:ping_pong: Latence totale: **${total}ms**`)
