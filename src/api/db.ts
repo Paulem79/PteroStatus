@@ -34,7 +34,9 @@ export function isConnectionOpen(connection: Connection) {
     return new Promise<boolean>((resolve) => {
         connection.ping(err => {
             const alive = !err;
-            console.log("État connexion ", alive ? "OK" : "DECONNECTE");
+            if (err) {
+                console.error("Erreur ping : " + err);
+            }
             resolve(connection && alive);
         });
     });
