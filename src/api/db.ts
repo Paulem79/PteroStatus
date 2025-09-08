@@ -28,3 +28,17 @@ export function tryConnection(connection: Connection, onSuccess?: () => void) {
   });
 }
 
+export function isConnectionOpen(connection: Connection) {
+  // mysql2 expose .state, qui vaut 'disconnected' si la connexion est fermée
+  // sinon, c'est 'connected' ou 'authenticated'
+  // @ts-ignore
+  return connection && connection.state === 'connected';
+}
+
+export function reconnect(connection: Connection, cb?: () => void) {
+  // Ferme puis rouvre la connexion
+  connection.destroy();
+  const newConn = getConnection();
+  tryConnection(newConn, cb);
+  return newConn;
+}
