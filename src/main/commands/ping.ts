@@ -135,6 +135,18 @@ export default new Command({
             )
             .addStringOption((option) =>
                 option
+                    .setName("hostname")
+                    .setNameLocalizations({
+                        fr: "domaine",
+                    })
+                    .setDescription("Base URL of the panel (eg: https://panel.example.com)")
+                    .setDescriptionLocalizations({
+                        fr: "URL de base du panel (ex: https://panel.exemple.com)",
+                    })
+                    .setRequired(false)
+            )
+            .addStringOption((option) =>
+                option
                     .setName("newname")
                     .setNameLocalizations({
                         fr: "nouveaunom",

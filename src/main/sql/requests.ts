@@ -245,3 +245,15 @@ export async function updatePingName(
     await query(`UPDATE pings SET name = ? WHERE id = ?`, [name, id]);
     return true;
 }
+
+export async function updatePingHostname(
+    id: number,
+    hostname: string,
+    guildId: string,
+): Promise<boolean> {
+    const ping = await getPingById(id);
+    if (!ping || ping.guild_id != guildId) return false;
+
+    await query(`UPDATE pings SET base_url = ? WHERE id = ?`, [hostname, id]);
+    return true;
+}
